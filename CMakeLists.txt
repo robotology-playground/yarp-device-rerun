@@ -5,65 +5,44 @@
 # BSD-3-Clause license. See the accompanying LICENSE file for details.
 
 cmake_minimum_required(VERSION 3.16...3.27)
-project(example LANGUAGES CXX)
-
-# add_executable(example_minimal main.cpp)
-
-
-include(FetchContent)
-FetchContent_Declare(rerun_sdk URL
-    https://github.com/rerun-io/rerun/releases/latest/download/rerun_cpp_sdk.zip)
-FetchContent_MakeAvailable(rerun_sdk)
+project(yarp-device-rerun LANGUAGES CXX)
 
 find_package(YARP 3.12.0 REQUIRED)
-add_executable(example_rerun)
-target_sources(example_rerun PRIVATE main.cpp Example.cpp Example.h)
+find_package(YCM REQUIRED)
 
-target_link_libraries(example_rerun  PRIVATE  YARP::YARP_os
-                                        YARP::YARP_dev
-                                        YARP::YARP_init
-                                        rerun_sdk)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
 
-install(
-  TARGETS example_rerun
-  COMPONENT utilities
-  DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+if(MSVC)
+  set(CMAKE_DEBUG_POSTFIX "d")
+endif()
 
-set_property(TARGET example_rerun PROPERTY FOLDER "Command Line Tools")
-# yarp_prepare_plugin(example
-#                     CATEGORY device
-#                     TYPE Example
-#                     INCLUDE Example.h
-#                     DEFAULT ON)
-#                     # GENERATE_PARSER)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# if(ENABLE_example)
-#     yarp_add_plugin(YARP_example)
+set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-#     target_sources(YARP_example  PRIVATE Example.cpp
-#                                     Example.h
-#                                     main.cpp
-#                                                         # Example_ParamsParser.cpp
-#                                                         # Example_ParamsParser.h
-#                                                         )
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-#     target_link_libraries(YARP_example  PRIVATE  YARP::YARP_os
-#                                             YARP::YARP_dev
-#                                             YARP::YARP_init
-#                                             rerun_sdk)
-#     list(APPEND YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS YARP_os
-#                                                         YARP_dev
-#                                                         YARP::YARP_init)
+set(YARP_FORCE_DYNAMIC_PLUGINS TRUE CACHE INTERNAL "yarp-device-pylon is always built with dynamic plugins")
+set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Build libraries as shared as opposed to static")
 
-#     yarp_install(TARGETS YARP_example
-#                 EXPORT YARP_${YARP_PLUGIN_MASTER}
-#                 COMPONENT ${YARP_PLUGIN_MASTER}
-#                 LIBRARY DESTINATION ${YARP_DYNAMIC_PLUGINS_INSTALL_DIR}
-#                 ARCHIVE DESTINATION ${YARP_STATIC_PLUGINS_INSTALL_DIR}
-#                 YARP_INI DESTINATION ${YARP_PLUGIN_MANIFESTS_INSTALL_DIR})
+include(AddInstallRPATHSupport)
+add_install_rpath_support(BIN_DIRS "${CMAKE_INSTALL_FULL_BINDIR}"
+                          LIB_DIRS "${CMAKE_INSTALL_FULL_LIBDIR}"
+                          INSTALL_NAME_DIR "${CMAKE_INSTALL_FULL_LIBDIR}"
+                          USE_LINK_PATH)
 
-#     set(YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS ${YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS} PARENT_SCOPE)
+if(NOT CMAKE_CONFIGURATION_TYPES)
+    if(NOT CMAKE_BUILD_TYPE)
+        message(STATUS "Setting build type to 'Release' as none was specified.")
+        set_property(CACHE CMAKE_BUILD_TYPE PROPERTY VALUE "Release")
+    endif()
+endif()
 
-#     set_property(TARGET YARP_example PROPERTY FOLDER "Plugins/Device")
-# endif()
+set_property(GLOBAL PROPERTY USE_FOLDERS 1)
+
+add_subdirectory(src)
+include(AddUninstallTarget)
+

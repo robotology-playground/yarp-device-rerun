@@ -6,38 +6,36 @@
  * BSD-3-Clause license. See the accompanying LICENSE file for details.
  */
 
-#ifndef RERUN_EXAMPLE_H
-#define RERUN_EXAMPLE_H
+#ifndef YARP_LOGGER_RERUN_H
+#define YARP_LOGGER_RERUN_H
 
 #include <yarp/dev/DeviceDriver.h>
 #include <yarp/os/LogComponent.h>
-#include <yarp/os/RFModule.h>
 #include <yarp/dev/IEncoders.h>
 #include <yarp/dev/PolyDriver.h>
 
 #include <rerun.hpp>
 #include <rerun/demo_utils.hpp>
 
-#include <urdf_parser/urdf_parser.h>
+// #include <urdf_parser/urdf_parser.h>
 
 
-YARP_DECLARE_LOG_COMPONENT(RERUN_EXAMPLE)
+YARP_DECLARE_LOG_COMPONENT(YARP_LOGGER_RERUN)
 
-class Example : public yarp::os::RFModule {
+class YarpLoggerRerun : public yarp::dev::DeviceDriver {
     public:
-        Example() = default;
-        virtual ~Example() override = default;
+    YarpLoggerRerun();
+    ~YarpLoggerRerun() override;
 
-        // //DeviceDriver
-        /**
-            * Configure with a set of options.
-            * @param config The options to use
-            * @return true iff the object could be configured.
-            */
-        // bool open(yarp::os::Searchable& config) override;
-        bool configure(yarp::os::ResourceFinder& rf) override;
-        bool updateModule() override;
-        double getPeriod() override;
+    //DeviceDriver
+    bool close() override;
+    /**
+        * Configure with a set of options.
+        * @param config The options to use
+        * @return true iff the object could be configured.
+        */
+    bool open(yarp::os::Searchable& config) override;
+    // void run() override;
 
     private:
         void loadURDF(rerun::RecordingStream& rr);
@@ -51,4 +49,4 @@ class Example : public yarp::os::RFModule {
         int axes;
 };
 
-#endif // RERUN_EXAMPLE_H
+#endif // YARP_LOGGER_RERUN_H
