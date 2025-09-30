@@ -13,16 +13,20 @@
 #include <yarp/os/LogComponent.h>
 #include <yarp/dev/IEncoders.h>
 #include <yarp/dev/PolyDriver.h>
+#include <yarp/os/PeriodicThread.h>
 
 #include <rerun.hpp>
 #include <rerun/demo_utils.hpp>
+#include <array>
 
-// #include <urdf_parser/urdf_parser.h>
-
+#include <iDynTree/Model.h>
+#include <iDynTree/ModelLoader.h>
+#include <iDynTree/KinDynComputations.h>
+#include <iDynTree/Traversal.h>
 
 YARP_DECLARE_LOG_COMPONENT(YARP_LOGGER_RERUN)
 
-class YarpLoggerRerun : public yarp::dev::DeviceDriver {
+class YarpLoggerRerun : public yarp::dev::DeviceDriver, public yarp::os::PeriodicThread {
     public:
     YarpLoggerRerun();
     ~YarpLoggerRerun() override;
@@ -35,18 +39,31 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver {
         * @return true iff the object could be configured.
         */
     bool open(yarp::os::Searchable& config) override;
-    // void run() override;
+    void run() override;
 
     private:
-        void loadURDF(rerun::RecordingStream& rr);
-        std::string parse_urdf(const std::string& path);
-        void extract_joints();
+    void loadURDF(rerun::RecordingStream& rr);
+    void animateURDF();
+    bool initKinematics(const std::string& urdfPath);
+    void updateLinkPosesFromEncoders();
         rerun::RecordingStream rr{"rerun_example", "id_example"};
         std::vector<std::string> axesNames;
         yarp::dev::PolyDriver driver;
         yarp::dev::IEncoders* iEnc{nullptr};
         std::vector<double> encState;
         int axes;
+        std::mutex deviceMutex;
+        struct JointInfo {
+            std::string name;               // Joint (and corresponding link) name
+            std::array<float,3> axis;        // Rotation axis in parent frame
+        };
+        std::vector<JointInfo> joints;       // One entry per controllable axis
+        size_t frameCounter{0};              // Monotonic frame counter for time sequence
+    std::string urdfPath;                // Configured URDF path
+
+    iDynTree::ModelLoader modelLoader;
+    iDynTree::KinDynComputations kinDyn;
+    bool kinematicsInitialized{false};
 };
 
 #endif // YARP_LOGGER_RERUN_H
