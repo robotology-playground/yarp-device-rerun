@@ -24,9 +24,11 @@
 #include <iDynTree/KinDynComputations.h>
 #include <iDynTree/Traversal.h>
 
+#include "YarpLoggerRerun_ParamsParser.h"
+
 YARP_DECLARE_LOG_COMPONENT(YARP_LOGGER_RERUN)
 
-class YarpLoggerRerun : public yarp::dev::DeviceDriver, public yarp::os::PeriodicThread {
+class YarpLoggerRerun : public yarp::dev::DeviceDriver, public yarp::os::PeriodicThread, public YarpLoggerRerun_ParamsParser {
     public:
     YarpLoggerRerun();
     ~YarpLoggerRerun() override;
@@ -46,11 +48,11 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver, public yarp::os::Periodi
     void animateURDF();
     bool initKinematics(const std::string& urdfPath);
     void updateLinkPosesFromEncoders();
-        rerun::RecordingStream rr{"rerun_example", "id_example"};
+        rerun::RecordingStream rr{"rerun_example_" + std::to_string(yarp::os::Time::now()), "id_example"};
         std::vector<std::string> axesNames;
         yarp::dev::PolyDriver driver;
         yarp::dev::IEncoders* iEnc{nullptr};
-        std::vector<double> encState;
+        std::vector<double> jointsPos, jointsVel, jointsAcc;
         int axes;
         std::mutex deviceMutex;
         struct JointInfo {

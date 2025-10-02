@@ -37,20 +37,23 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
 {
     std::lock_guard<std::mutex> guard(this->deviceMutex);
     yCInfo(YARP_LOGGER_RERUN) << "Configuring Rerun visualizer...";
+    
+    if(!parseParams(config)) {
+        yCError(YARP_LOGGER_RERUN) << "Error parsing parameters";
+        return false;
+    }
 
-    yarp::os::ResourceFinder &rf = yarp::os::ResourceFinder::getResourceFinderSingleton();
-    auto remote = rf.check("remote", yarp::os::Value("/ergocubSim/head")).asString();
-
+    std::string remote_port = "/" + m_robot + "/" + m_remote;
     yarp::dev::IPositionControl* iPos{nullptr};
     yarp::dev::IAxisInfo* iAxis{nullptr};
 
     yarp::os::Property conf;
     conf.put("device", "remote_controlboard");
-    conf.put("remote", remote);
+    conf.put("remote", remote_port);
     conf.put("local", "/log");
     if (!driver.open(conf))
     {
-        yCError(YARP_LOGGER_RERUN) << "Failed to connect to" << remote;
+        yCError(YARP_LOGGER_RERUN) << "Failed to connect to" << remote_port;
         return false;
     }
     if (!(driver.view(iEnc) && driver.view(iPos) && driver.view(iAxis)))
@@ -63,7 +66,9 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
     double min, max, range;
     iPos->getAxes(&axes);
     axesNames.resize(axes);
-    encState.resize(axes);
+    jointsPos.resize(axes);
+    jointsVel.resize(axes);
+    jointsAcc.resize(axes);
 
     for (auto i = 0; i < axes; i++)
     {
@@ -105,32 +110,50 @@ bool YarpLoggerRerun::close()
 void YarpLoggerRerun::run()
 {
     auto current_time = yarp::os::Time::now();
-    // Give rerun a frame index so it shows animation in timeline
-    rr.set_time_sequence("frame", static_cast<int64_t>(frameCounter++));
-    if (encState.size() < axes)
+    // std::string_view time_key = "yarp_time";
+    // rr.set_time(time_key, current_time);
+    if (jointsPos.size() < axes || jointsVel.size() < axes)
     {
-        yCError(YARP_LOGGER_RERUN) << "encState size mismatch!";
+        yCError(YARP_LOGGER_RERUN) << "jointsPos or jointsVel size mismatch!";
         return;
     }
-    if (!iEnc->getEncoders(encState.data()))
+    if (!iEnc->getEncoders(jointsPos.data()))
     {
         yCError(YARP_LOGGER_RERUN) << "Failed to get encoders!";
+        return;
+    }
+    if (!iEnc->getEncoderSpeeds(jointsVel.data()))
+    {
+        yCError(YARP_LOGGER_RERUN) << "Failed to get joints velocities!";
+        return;
+    }
+    if (!iEnc->getEncoderAccelerations(jointsAcc.data()))
+    {
+        yCError(YARP_LOGGER_RERUN) << "Failed to get joints accelerations!";
         return;
     }
 
     for (size_t i = 0; i < axesNames.size(); ++i) 
     {
-        rr.log("ergocubSim/joints/" + axesNames[i] + "/angle_deg", rerun::Scalars(encState[i]));
+        rr.log("encoders/" + axesNames[i], rerun::Scalars(jointsPos[i]));
     }
 
-    animateURDF();
+    for (size_t i = 0; i < axesNames.size(); ++i) 
+    {
+        rr.log("velocities/" + axesNames[i], rerun::Scalars(jointsVel[i]));
+    }
+
+    for (size_t i = 0; i < axesNames.size(); ++i) 
+    {
+        rr.log("accelerations/" + axesNames[i], rerun::Scalars(jointsAcc[i]));
+    }
+    // animateURDF();
 }
 
 void YarpLoggerRerun::loadURDF(rerun::RecordingStream& rr) 
 {
-    // Avoid trailing slash so that child paths become ergocubSim/<entity>
-    std::string path = urdfPath.empty() ? "/home/mgloria/iit/ergocub-software/urdf/ergoCub/robots/ergoCubSN002/model.urdf" : urdfPath;
-    std::string_view name = "ergocubSim";
+    std::string path = "/home/mgloria/iit/ergocub-software/urdf/ergoCub/robots/ergoCubSN002/model.urdf";
+    std::string_view name = "ergocubSim/";
     rr.log_file_from_path(path, name, false);
     rr.spawn().exit_on_failure();
 }
@@ -156,10 +179,10 @@ void YarpLoggerRerun::animateURDF()
         return;
     }
 
-    // const size_t n = std::min(encState.size(), joints.size());
+    // const size_t n = std::min(jointsPos.size(), joints.size());
     // for (size_t i = 0; i < n; ++i)
     // {
-    //     float angle_rad = static_cast<float>(encState[i] * M_PI / 180.0);
+    //     float angle_rad = static_cast<float>(jointsPos[i] * M_PI / 180.0);
     //     auto &j = joints[i];
     //     rr.log(
     //         std::string("ergocubSim/encoders/") + j.name,
@@ -226,7 +249,6 @@ void YarpLoggerRerun::updateLinkPosesFromEncoders()
 
     iDynTree::VectorDynSize q(dofs);
     static std::unordered_map<std::string,size_t> jointNameToIdx;
-    static bool reportedMapping = false;
     if (jointNameToIdx.empty())
     {
         for (size_t i = 0; i < dofs; i++)
@@ -238,29 +260,12 @@ void YarpLoggerRerun::updateLinkPosesFromEncoders()
     {
         q(i) = 0.0;
     }
-    size_t matched = 0;
     for (size_t i = 0; i < axesNames.size(); ++i)
     {
         auto it = jointNameToIdx.find(axesNames[i]);
         if (it != jointNameToIdx.end())
         {
-            q(it->second) = encState[i] * M_PI / 180.0; // deg->rad
-            matched++;
-        }
-    }
-    if (!reportedMapping)
-    {
-        reportedMapping = true;
-        yCInfo(YARP_LOGGER_RERUN) << "Matched" << matched << "of" << axesNames.size() << "YARP axes to" << dofs << "URDF DOFs";
-        if (matched != axesNames.size())
-        {
-            for (const auto &name : axesNames)
-            {
-                if (!jointNameToIdx.count(name))
-                {
-                    yCWarning(YARP_LOGGER_RERUN) << "No URDF joint for axis name" << name;
-                }
-            }
+            q(it->second) = jointsPos[i] * M_PI / 180.0; // deg->rad
         }
     }
     iDynTree::Twist baseVel = iDynTree::Twist::Zero();
@@ -284,11 +289,20 @@ void YarpLoggerRerun::updateLinkPosesFromEncoders()
         double qx, qy, qz, qw; 
 
         R.getQuaternion(qx, qy, qz, qw);
-        rr.log(
-            std::string("ergocubSim/links/") + linkName,
-            rerun::Transform3D()
-                .with_translation({static_cast<float>(p(0)), static_cast<float>(p(1)), static_cast<float>(p(2))})
-                .with_rotation(rerun::Quaternion{static_cast<float>(qw), static_cast<float>(qx), static_cast<float>(qy), static_cast<float>(qz)})
-        );
+        // rr.log(
+        //     std::string("ergocubSim/encoders/") + linkName,
+        //     rerun::Transform3D()
+        //         .with_translation({static_cast<float>(p(0)), static_cast<float>(p(1)), static_cast<float>(p(2))})
+        //         .with_rotation(rerun::Quaternion{static_cast<float>(qw), static_cast<float>(qx), static_cast<float>(qy), static_cast<float>(qz)})
+        //         // .with_relation(rerun::components::TransformRelation::ChildFromParent)
+        // );
+
     }
+    rr.log(
+        "ergocubSim/head",
+        rerun::Transform3D()
+            .with_translation({0.f, 0.f, 0.f})
+            .with_rotation(rerun::Quaternion{1.f, 0.f, 0.f, 0.f})
+            .with_relation(rerun::components::TransformRelation::ChildFromParent)
+    );
 }
