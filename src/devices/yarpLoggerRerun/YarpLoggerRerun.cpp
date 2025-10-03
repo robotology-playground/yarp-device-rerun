@@ -35,7 +35,7 @@ YarpLoggerRerun::~YarpLoggerRerun()
 
 bool YarpLoggerRerun::open(yarp::os::Searchable& config) 
 {
-    std::lock_guard<std::mutex> guard(this->deviceMutex);
+    // std::lock_guard<std::mutex> guard(this->deviceMutex);
     yCInfo(YARP_LOGGER_RERUN) << "Configuring Rerun visualizer...";
     
     if(!parseParams(config)) {
@@ -109,12 +109,13 @@ bool YarpLoggerRerun::close()
 
 void YarpLoggerRerun::run()
 {
+    std::lock_guard<std::mutex> rerunGuard(rerunMutex);
     auto current_time = yarp::os::Time::now();
     // std::string_view time_key = "yarp_time";
     // rr.set_time(time_key, current_time);
-    if (jointsPos.size() < axes || jointsVel.size() < axes)
+    if (jointsPos.size() < axes || jointsVel.size() < axes || jointsAcc.size() < axes)
     {
-        yCError(YARP_LOGGER_RERUN) << "jointsPos or jointsVel size mismatch!";
+        yCError(YARP_LOGGER_RERUN) << "jointsPos, jointsVel or jointsAcc size mismatch!";
         return;
     }
     if (!iEnc->getEncoders(jointsPos.data()))
@@ -138,24 +139,46 @@ void YarpLoggerRerun::run()
         rr.log("encoders/" + axesNames[i], rerun::Scalars(jointsPos[i]));
     }
 
-    for (size_t i = 0; i < axesNames.size(); ++i) 
-    {
-        rr.log("velocities/" + axesNames[i], rerun::Scalars(jointsVel[i]));
-    }
+    // for (size_t i = 0; i < axesNames.size(); ++i) 
+    // {
+    //     rr.log("velocities/" + axesNames[i], rerun::Scalars(jointsVel[i]));
+    // }
 
-    for (size_t i = 0; i < axesNames.size(); ++i) 
-    {
-        rr.log("accelerations/" + axesNames[i], rerun::Scalars(jointsAcc[i]));
-    }
+    // for (size_t i = 0; i < axesNames.size(); ++i) 
+    // {
+    //     rr.log("accelerations/" + axesNames[i], rerun::Scalars(jointsAcc[i]));
+    // }
     // animateURDF();
 }
 
 void YarpLoggerRerun::loadURDF(rerun::RecordingStream& rr) 
 {
+    std::lock_guard<std::mutex> rerunGuard(rerunMutex);
     std::string path = "/home/mgloria/iit/ergocub-software/urdf/ergoCub/robots/ergoCubSN002/model.urdf";
     std::string_view name = "ergocubSim/";
-    rr.log_file_from_path(path, name, false);
-    rr.spawn().exit_on_failure();
+
+    if (m_saveToFile)
+    {
+        yCInfo(YARP_LOGGER_RERUN) << "Start saving log to file";
+
+        std::string file_name = "my_log.rrd";
+        rr.set_sinks(rerun::FileSink{file_name});
+        // rr.spawn().exit_on_failure();
+        rr.log_file_from_path(path, name, false);
+    }
+    else
+    {
+        yCInfo(YARP_LOGGER_RERUN) << "Only realtime streaming, no file saving";
+        // rr.set_sinks(rerun::GrpcSink{});
+        rr.spawn().exit_on_failure();
+        rr.log_file_from_path(path, name, false);
+    }
+
+    // rr.spawn().exit_on_failure();
+    // rr.save("my_log.rrd").exit_on_failure();
+    // rr.log_file_from_path(path, name, false);
+
+    yCInfo(YARP_LOGGER_RERUN) << "Saving log to my_log.rrd";
 }
 
 void YarpLoggerRerun::animateURDF()

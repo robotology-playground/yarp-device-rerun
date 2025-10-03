@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Thu Oct  2 17:06:37 2025
+// Generated on: Fri Oct  3 15:11:29 2025
 
 
 #ifndef YARPLOGGERRERUN_PARAMSPARSER_H
@@ -27,10 +27,12 @@
 * |:----------:|:--------------:|:------:|:-----:|:-------------:|:--------:|:-----------------------------:|:-----:|
 * | -          | robot          | string | -     | -             | 0        | Name of the robot             | -     |
 * | -          | remote         | string | -     | -             | 0        | Name of the port to attach to | -     |
+* | -          | saveToFile     | bool   | -     | false         | 0        | -                             | -     |
+* | -          | logIEncoders   | bool   | -     | true          | 0        | -                             | -     |
 *
 * The device can be launched by yarpdev using one of the following examples (with and without all optional parameters):
 * \code{.unparsed}
-* yarpdev --device yarpLoggerRerun --robot <optional_value> --remote <optional_value>
+* yarpdev --device yarpLoggerRerun --robot <optional_value> --remote <optional_value> --saveToFile false --logIEncoders true
 * \endcode
 *
 * \code{.unparsed}
@@ -60,9 +62,13 @@ public:
 
     const std::string m_robot_defaultValue = {""};
     const std::string m_remote_defaultValue = {""};
+    const std::string m_saveToFile_defaultValue = {"false"};
+    const std::string m_logIEncoders_defaultValue = {"true"};
 
     std::string m_robot = {}; //This default value of this string is an empty string. It is highly recommended to provide a suggested value also for optional string parameters.
     std::string m_remote = {}; //This default value of this string is an empty string. It is highly recommended to provide a suggested value also for optional string parameters.
+    bool m_saveToFile = {false};
+    bool m_logIEncoders = {true};
 
     bool          parseParams(const yarp::os::Searchable & config) override;
     std::string   getDeviceClassName() const override { return m_device_classname; }

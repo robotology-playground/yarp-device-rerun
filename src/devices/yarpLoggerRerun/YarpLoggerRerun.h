@@ -55,6 +55,7 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver, public yarp::os::Periodi
         std::vector<double> jointsPos, jointsVel, jointsAcc;
         int axes;
         std::mutex deviceMutex;
+        std::mutex rerunMutex;
         struct JointInfo {
             std::string name;               // Joint (and corresponding link) name
             std::array<float,3> axis;        // Rotation axis in parent frame

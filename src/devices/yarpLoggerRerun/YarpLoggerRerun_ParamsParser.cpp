@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Thu Oct  2 17:06:37 2025
+// Generated on: Fri Oct  3 15:11:29 2025
 
 
 #include "YarpLoggerRerun_ParamsParser.h"
@@ -30,6 +30,8 @@ std::vector<std::string> YarpLoggerRerun_ParamsParser::getListOfParams() const
     std::vector<std::string> params;
     params.push_back("robot");
     params.push_back("remote");
+    params.push_back("saveToFile");
+    params.push_back("logIEncoders");
     return params;
 }
 
@@ -44,6 +46,18 @@ bool YarpLoggerRerun_ParamsParser::getParamValue(const std::string& paramName, s
     if (paramName =="remote")
     {
         paramValue = m_remote;
+        return true;
+    }
+    if (paramName =="saveToFile")
+    {
+        if (m_saveToFile==true) paramValue = "true";
+        else paramValue = "false";
+        return true;
+    }
+    if (paramName =="logIEncoders")
+    {
+        if (m_logIEncoders==true) paramValue = "true";
+        else paramValue = "false";
         return true;
     }
 
@@ -101,6 +115,34 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         prop_check.unput("remote");
     }
 
+    //Parser of parameter saveToFile
+    {
+        if (config.check("saveToFile"))
+        {
+            m_saveToFile = config.find("saveToFile").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'saveToFile' using value:" << m_saveToFile;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'saveToFile' using DEFAULT value:" << m_saveToFile;
+        }
+        prop_check.unput("saveToFile");
+    }
+
+    //Parser of parameter logIEncoders
+    {
+        if (config.check("logIEncoders"))
+        {
+            m_logIEncoders = config.find("logIEncoders").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIEncoders' using value:" << m_logIEncoders;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIEncoders' using DEFAULT value:" << m_logIEncoders;
+        }
+        prop_check.unput("logIEncoders");
+    }
+
     /*
     //This code check if the user set some parameter which are not check by the parser
     //If the parser is set in strict mode, this will generate an error
@@ -139,9 +181,11 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("This is the list of the parameters accepted by the device:\n");
     doc = doc + std::string("'robot': Name of the robot\n");
     doc = doc + std::string("'remote': Name of the port to attach to\n");
+    doc = doc + std::string("'saveToFile': \n");
+    doc = doc + std::string("'logIEncoders': \n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --robot <optional_value> --remote <optional_value>\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --robot <optional_value> --remote <optional_value> --saveToFile false --logIEncoders true\n";
     doc = doc + std::string("Using only mandatory params:\n");
     doc = doc + " yarpdev --device yarpLoggerRerun\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
