@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Fri Oct  3 15:11:29 2025
+// Generated on: Mon Oct  6 15:57:55 2025
 
 
 #include "YarpLoggerRerun_ParamsParser.h"
@@ -30,6 +30,8 @@ std::vector<std::string> YarpLoggerRerun_ParamsParser::getListOfParams() const
     std::vector<std::string> params;
     params.push_back("robot");
     params.push_back("remote");
+    params.push_back("urdf");
+    params.push_back("viewer_ip");
     params.push_back("saveToFile");
     params.push_back("logIEncoders");
     return params;
@@ -46,6 +48,16 @@ bool YarpLoggerRerun_ParamsParser::getParamValue(const std::string& paramName, s
     if (paramName =="remote")
     {
         paramValue = m_remote;
+        return true;
+    }
+    if (paramName =="urdf")
+    {
+        paramValue = m_urdf;
+        return true;
+    }
+    if (paramName =="viewer_ip")
+    {
+        paramValue = m_viewer_ip;
         return true;
     }
     if (paramName =="saveToFile")
@@ -96,7 +108,9 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         }
         else
         {
-            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'robot' using DEFAULT value:" << m_robot;
+            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'robot' not found!";
+            yCError(YarpLoggerRerunParamsCOMPONENT) << "Description of the parameter: Name of the robot";
+            return false;
         }
         prop_check.unput("robot");
     }
@@ -110,9 +124,39 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         }
         else
         {
-            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'remote' using DEFAULT value:" << m_remote;
+            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'remote' not found!";
+            yCError(YarpLoggerRerunParamsCOMPONENT) << "Description of the parameter: Name of the port to attach to";
+            return false;
         }
         prop_check.unput("remote");
+    }
+
+    //Parser of parameter urdf
+    {
+        if (config.check("urdf"))
+        {
+            m_urdf = config.find("urdf").asString();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'urdf' using value:" << m_urdf;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'urdf' using DEFAULT value:" << m_urdf;
+        }
+        prop_check.unput("urdf");
+    }
+
+    //Parser of parameter viewer_ip
+    {
+        if (config.check("viewer_ip"))
+        {
+            m_viewer_ip = config.find("viewer_ip").asString();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'viewer_ip' using value:" << m_viewer_ip;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'viewer_ip' using DEFAULT value:" << m_viewer_ip;
+        }
+        prop_check.unput("viewer_ip");
     }
 
     //Parser of parameter saveToFile
@@ -181,12 +225,14 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("This is the list of the parameters accepted by the device:\n");
     doc = doc + std::string("'robot': Name of the robot\n");
     doc = doc + std::string("'remote': Name of the port to attach to\n");
+    doc = doc + std::string("'urdf': \n");
+    doc = doc + std::string("'viewer_ip': \n");
     doc = doc + std::string("'saveToFile': \n");
     doc = doc + std::string("'logIEncoders': \n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --robot <optional_value> --remote <optional_value> --saveToFile false --logIEncoders true\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --robot <mandatory_value> --remote <mandatory_value> --urdf model.urdf --viewer_ip localhost --saveToFile false --logIEncoders true\n";
     doc = doc + std::string("Using only mandatory params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --robot <mandatory_value> --remote <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
 }
