@@ -54,7 +54,6 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
         return false;
     }
 
-    double min, max, range;
     iPos->getAxes(&axes);
     axesNames.resize(axes);
     jointsPos.resize(axes);
@@ -74,7 +73,7 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
     yarp::os::ResourceFinder & rf = yarp::os::ResourceFinder::getResourceFinderSingleton();
     urdfPath = rf.findFileByName(m_urdf);
 
-    loadURDF(rr);
+    configureRerun(recordingStream);
 
     this->start();
     return true;
@@ -94,11 +93,6 @@ void YarpLoggerRerun::run()
     std::lock_guard<std::mutex> rerunGuard(rerunMutex);
     auto current_time = yarp::os::Time::now();
 
-    if (jointsPos.size() < axes || jointsVel.size() < axes || jointsAcc.size() < axes)
-    {
-        yCError(YARP_LOGGER_RERUN) << "jointsPos, jointsVel or jointsAcc size mismatch!";
-        return;
-    }
     if (!iEnc->getEncoders(jointsPos.data()))
     {
         yCError(YARP_LOGGER_RERUN) << "Failed to get encoders!";
@@ -119,14 +113,14 @@ void YarpLoggerRerun::run()
     {
         for (size_t i = 0; i < axesNames.size(); ++i) 
         {
-            rr.log("encoders/" + axesNames[i], rerun::Scalars(jointsPos[i]));
-            rr.log("velocities/" + axesNames[i], rerun::Scalars(jointsVel[i]));
-            rr.log("accelerations/" + axesNames[i], rerun::Scalars(jointsAcc[i]));
+            recordingStream.log("encoders/" + axesNames[i], rerun::Scalars(jointsPos[i]));
+            recordingStream.log("velocities/" + axesNames[i], rerun::Scalars(jointsVel[i]));
+            recordingStream.log("accelerations/" + axesNames[i], rerun::Scalars(jointsAcc[i]));
         }
     }
 }
 
-void YarpLoggerRerun::loadURDF(rerun::RecordingStream& rr) 
+void YarpLoggerRerun::configureRerun(rerun::RecordingStream& recordingStream) 
 {
     std::lock_guard<std::mutex> rerunGuard(rerunMutex);
 
@@ -134,12 +128,12 @@ void YarpLoggerRerun::loadURDF(rerun::RecordingStream& rr)
     {
         yCInfo(YARP_LOGGER_RERUN) << "Start saving log to file";
         std::string file_name = "my_log.rrd";
-        rr.set_sinks(rerun::GrpcSink{"rerun+http://" + m_viewer_ip + ":9876/proxy"}, rerun::FileSink{file_name});
+        recordingStream.set_sinks(rerun::GrpcSink{"rerun+http://" + m_viewer_ip + ":9876/proxy"}, rerun::FileSink{file_name});
     }
     else
     {
         yCInfo(YARP_LOGGER_RERUN) << "Only realtime streaming, no file saving";
-        rr.set_sinks(rerun::GrpcSink{"rerun+http://" + m_viewer_ip + ":9876/proxy"});
+        recordingStream.set_sinks(rerun::GrpcSink{"rerun+http://" + m_viewer_ip + ":9876/proxy"});
     }
-    rr.log_file_from_path(urdfPath, m_robot, false);
+    recordingStream.log_file_from_path(urdfPath, m_robot, false);
 }

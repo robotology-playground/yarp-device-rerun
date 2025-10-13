@@ -32,9 +32,9 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver, public yarp::os::Periodi
     void run() override;
 
     private:
-    void loadURDF(rerun::RecordingStream& rr);
+    void configureRerun(rerun::RecordingStream& rr);
 
-    rerun::RecordingStream rr{"rerun_example_" + std::to_string(yarp::os::Time::now()), "id_example"};
+    rerun::RecordingStream recordingStream{"logger_app_id_" + std::to_string(yarp::os::Time::now()), "logger_recording_id"};
     std::vector<std::string> axesNames;
     yarp::dev::PolyDriver driver;
     yarp::dev::IEncoders* iEnc{nullptr};
