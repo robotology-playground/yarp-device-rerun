@@ -7,8 +7,6 @@
  */
 
 #include <yarp/os/ResourceFinder.h>
-#include <yarp/dev/IPositionControl.h>
-#include <yarp/dev/IAxisInfo.h>
 #include <rerun/log_sink.hpp>
 
 #include "YarpLoggerRerun.h"
@@ -22,7 +20,7 @@ YarpLoggerRerun::YarpLoggerRerun() : yarp::os::PeriodicThread(log_thread_default
 }
 YarpLoggerRerun::~YarpLoggerRerun() 
 {
-    close();
+
 }
 
 bool YarpLoggerRerun::open(yarp::os::Searchable& config) 
@@ -34,20 +32,17 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
         return false;
     }
 
-    std::string remote_port = "/" + m_robot + "/" + m_remote;
-    yarp::dev::IPositionControl* iPos{nullptr};
-    yarp::dev::IAxisInfo* iAxis{nullptr};
-
     yarp::os::Property conf;
-    conf.put("device", "remote_controlboard");
-    conf.put("remote", remote_port);
-    conf.put("local", "/log");
+    conf.fromString(config.toString().c_str());
+    conf.put("device", "controlboardremapper");
+
     if (!driver.open(conf))
     {
-        yCError(YARP_LOGGER_RERUN) << "Failed to connect to" << remote_port;
+        yCError(YARP_LOGGER_RERUN) << "Failed to open controlBoard driver";
         return false;
     }
-    if (!(driver.view(iEnc) && driver.view(iPos) && driver.view(iAxis)))
+
+    if (!(driver.view(iEnc) && driver.view(iPos) && driver.view(iAxis) && driver.view(iMultWrap)))
     {
         yCError(YARP_LOGGER_RERUN) << "Failed to open interfaces";
         driver.close();
@@ -55,27 +50,21 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
     }
 
     iPos->getAxes(&axes);
-    axesNames.resize(axes);
     jointsPos.resize(axes);
     jointsVel.resize(axes);
     jointsAcc.resize(axes);
 
-    for (auto i = 0; i < axes; i++)
+    if (!loadConfig(config))
     {
-        if (!iAxis->getAxisName(i, axesNames[i]))
-        {
-            yCError(YARP_LOGGER_RERUN) << "Failed to get axis name for axis" << i;
-            driver.close();
-            return false;
-        }
+        yCError(YARP_LOGGER_RERUN) << "Error loading configuration";
+        return false;
+    
     }
-
     yarp::os::ResourceFinder & rf = yarp::os::ResourceFinder::getResourceFinderSingleton();
     urdfPath = rf.findFileByName(m_urdf);
 
     configureRerun(recordingStream);
 
-    this->start();
     return true;
 }
 
@@ -85,13 +74,23 @@ bool YarpLoggerRerun::close()
     {
         stop();
     }
+
+    recordingStream.set_sinks();
+
+    if (driver.isValid())
+    {
+        driver.close();
+    }
     return true;
 }
 
 void YarpLoggerRerun::run()
 {
-    std::lock_guard<std::mutex> rerunGuard(rerunMutex);
-    auto current_time = yarp::os::Time::now();
+    int axesCount = 0;
+    if (!iEnc->getAxes(&axesCount) || axesCount <= 0) {
+        yCError(YARP_LOGGER_RERUN) << "Invalid axes count";
+        return;
+    }
 
     if (!iEnc->getEncoders(jointsPos.data()))
     {
@@ -103,37 +102,108 @@ void YarpLoggerRerun::run()
         yCError(YARP_LOGGER_RERUN) << "Failed to get joints velocities!";
         return;
     }
-    if (!iEnc->getEncoderAccelerations(jointsAcc.data()))
-    {
-        yCError(YARP_LOGGER_RERUN) << "Failed to get joints accelerations!";
-        return;
-    }
+    // if (!iEnc->getEncoderAccelerations(jointsAcc.data()))
+    // {
+    //     yCError(YARP_LOGGER_RERUN) << "Failed to get joints accelerations!";
+    //     return;
+    // }
 
-    if (m_logIEncoders)
+    if (logIEncodersOption)
     {
         for (size_t i = 0; i < axesNames.size(); ++i) 
         {
             recordingStream.log("encoders/" + axesNames[i], rerun::Scalars(jointsPos[i]));
             recordingStream.log("velocities/" + axesNames[i], rerun::Scalars(jointsVel[i]));
-            recordingStream.log("accelerations/" + axesNames[i], rerun::Scalars(jointsAcc[i]));
+            // recordingStream.log("accelerations/" + axesNames[i], rerun::Scalars(jointsAcc[i]));
         }
     }
 }
 
+bool YarpLoggerRerun::loadConfig(yarp::os::Searchable& config) 
+{
+    yarp::os::Property prop;
+    prop.fromString(config.toString().c_str());
+
+    yarp::os::Bottle* propNames = config.find("axesNames").asList();
+    for (auto i = 0; i < propNames->size(); i++)
+    {
+        axesNames.push_back(propNames->get(i).asString());
+    }
+    
+    if (prop.check("logIEncoders"))
+    {
+        logIEncodersOption = prop.find("logIEncoders").asBool();
+    }
+
+    if (prop.check("logURDF"))
+    {
+        logURDFOption = prop.find("logURDF").asBool();
+    }
+    
+    if (prop.check("fileName"))
+    {
+        fileName = prop.find("fileName").asString();
+    }
+
+    return true;
+}
+
 void YarpLoggerRerun::configureRerun(rerun::RecordingStream& recordingStream) 
 {
-    std::lock_guard<std::mutex> rerunGuard(rerunMutex);
-
-    if (m_saveToFile)
+    recordingStream.spawn();
+    if (m_saveToFile && !fileName.empty())
     {
         yCInfo(YARP_LOGGER_RERUN) << "Start saving log to file";
-        std::string file_name = "my_log.rrd";
-        recordingStream.set_sinks(rerun::GrpcSink{"rerun+http://" + m_viewer_ip + ":9876/proxy"}, rerun::FileSink{file_name});
+        recordingStream.set_sinks(rerun::GrpcSink{"rerun+http://" + m_viewer_ip + ":9876/proxy"}, rerun::FileSink{fileName + ".rrd"});
     }
     else
     {
         yCInfo(YARP_LOGGER_RERUN) << "Only realtime streaming, no file saving";
         recordingStream.set_sinks(rerun::GrpcSink{"rerun+http://" + m_viewer_ip + ":9876/proxy"});
     }
-    recordingStream.log_file_from_path(urdfPath, m_robot, false);
+    
+    if (logURDFOption)
+    {
+        recordingStream.log_file_from_path(urdfPath, m_robot, true);
+    }
+}
+
+bool YarpLoggerRerun::attachAll(const yarp::dev::PolyDriverList& driverList) {
+    std::lock_guard<std::mutex> guard(rerunMutex);
+    
+    this->attachAllControlBoards(driverList);
+    this->start();
+
+    return true;
+}
+
+bool YarpLoggerRerun::attachAllControlBoards(const yarp::dev::PolyDriverList& pList) 
+{
+    yCInfo(YARP_LOGGER_RERUN) << "Attaching all control boards";
+    yarp::dev::PolyDriverList controlBoardList;
+    for (size_t devIdx = 0; devIdx < (size_t)pList.size(); devIdx++)
+    {
+        yarp::dev::IEncoders* pEncs = 0;
+        if (pList[devIdx]->poly->view(pEncs))
+        {
+            controlBoardList.push(const_cast<yarp::dev::PolyDriverDescriptor&>(*pList[devIdx]));
+        }
+    }
+
+    if (!iMultWrap->attachAll(controlBoardList))
+    {
+        yCError(YARP_LOGGER_RERUN) << "Failed to attach all control boards";
+        return false;
+    }
+    return true;
+}
+
+bool YarpLoggerRerun::detachAll() 
+{
+    std::lock_guard<std::mutex> rerunGuard(rerunMutex);
+    if (isRunning())
+    {
+        stop();
+    }
+    return iMultWrap->detachAll();
 }

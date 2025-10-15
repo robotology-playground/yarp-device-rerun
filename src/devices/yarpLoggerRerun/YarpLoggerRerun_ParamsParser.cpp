@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Mon Oct 13 10:21:40 2025
+// Generated on: Wed Oct 15 09:39:42 2025
 
 
 #include "YarpLoggerRerun_ParamsParser.h"
@@ -108,9 +108,7 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         }
         else
         {
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'robot' not found!";
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Description of the parameter: Name of the robot";
-            return false;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'robot' using DEFAULT value:" << m_robot;
         }
         prop_check.unput("robot");
     }
@@ -124,9 +122,7 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         }
         else
         {
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'remote' not found!";
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Description of the parameter: Name of the port to attach to";
-            return false;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'remote' using DEFAULT value:" << m_remote;
         }
         prop_check.unput("remote");
     }
@@ -231,8 +227,8 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("'logIEncoders': \n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --robot <mandatory_value> --remote <mandatory_value> --urdf model.urdf --viewer_ip localhost --saveToFile false --logIEncoders true\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --robot <optional_value> --remote <optional_value> --urdf model.urdf --viewer_ip localhost --saveToFile false --logIEncoders true\n";
     doc = doc + std::string("Using only mandatory params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --robot <mandatory_value> --remote <mandatory_value>\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
 }
