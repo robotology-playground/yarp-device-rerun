@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Fri Oct 17 12:07:59 2025
+// Generated on: Fri Oct 17 15:17:35 2025
 
 
 #include "YarpLoggerRerun_ParamsParser.h"
@@ -30,6 +30,8 @@ std::vector<std::string> YarpLoggerRerun_ParamsParser::getListOfParams() const
     std::vector<std::string> params;
     params.push_back("axesNames");
     params.push_back("logIEncoders");
+    params.push_back("logIMotorEncoders");
+    params.push_back("logIPidControl");
     params.push_back("logURDF");
     params.push_back("fileName");
     params.push_back("filePath");
@@ -48,6 +50,18 @@ bool YarpLoggerRerun_ParamsParser::getParamValue(const std::string& paramName, s
     if (paramName =="logIEncoders")
     {
         if (m_logIEncoders==true) paramValue = "true";
+        else paramValue = "false";
+        return true;
+    }
+    if (paramName =="logIMotorEncoders")
+    {
+        if (m_logIMotorEncoders==true) paramValue = "true";
+        else paramValue = "false";
+        return true;
+    }
+    if (paramName =="logIPidControl")
+    {
+        if (m_logIPidControl==true) paramValue = "true";
         else paramValue = "false";
         return true;
     }
@@ -148,6 +162,36 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
             return false;
         }
         prop_check.unput("logIEncoders");
+    }
+
+    //Parser of parameter logIMotorEncoders
+    {
+        if (config.check("logIMotorEncoders"))
+        {
+            m_logIMotorEncoders = config.find("logIMotorEncoders").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIMotorEncoders' using value:" << m_logIMotorEncoders;
+        }
+        else
+        {
+            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'logIMotorEncoders' not found!";
+            return false;
+        }
+        prop_check.unput("logIMotorEncoders");
+    }
+
+    //Parser of parameter logIPidControl
+    {
+        if (config.check("logIPidControl"))
+        {
+            m_logIPidControl = config.find("logIPidControl").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIPidControl' using value:" << m_logIPidControl;
+        }
+        else
+        {
+            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'logIPidControl' not found!";
+            return false;
+        }
+        prop_check.unput("logIPidControl");
     }
 
     //Parser of parameter logURDF
@@ -263,6 +307,8 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("This is the list of the parameters accepted by the device:\n");
     doc = doc + std::string("'axesNames': \n");
     doc = doc + std::string("'logIEncoders': \n");
+    doc = doc + std::string("'logIMotorEncoders': \n");
+    doc = doc + std::string("'logIPidControl': \n");
     doc = doc + std::string("'logURDF': \n");
     doc = doc + std::string("'fileName': \n");
     doc = doc + std::string("'filePath': \n");
@@ -270,8 +316,8 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("'viewerIp': \n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders <mandatory_value> --logURDF <mandatory_value> --fileName <mandatory_value> --filePath <mandatory_value> --saveToFile <mandatory_value> --viewerIp <mandatory_value>\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders <mandatory_value> --logIMotorEncoders <mandatory_value> --logIPidControl <mandatory_value> --logURDF <mandatory_value> --fileName <mandatory_value> --filePath <mandatory_value> --saveToFile <mandatory_value> --viewerIp <mandatory_value>\n";
     doc = doc + std::string("Using only mandatory params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders <mandatory_value> --logURDF <mandatory_value> --fileName <mandatory_value> --filePath <mandatory_value> --saveToFile <mandatory_value> --viewerIp <mandatory_value>\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders <mandatory_value> --logIMotorEncoders <mandatory_value> --logIPidControl <mandatory_value> --logURDF <mandatory_value> --fileName <mandatory_value> --filePath <mandatory_value> --saveToFile <mandatory_value> --viewerIp <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
 }

@@ -12,6 +12,8 @@
 #include <yarp/dev/DeviceDriver.h>
 #include <yarp/os/LogStream.h>
 #include <yarp/dev/IEncoders.h>
+#include <yarp/dev/IMotorEncoders.h>
+#include <yarp/dev/IPidControl.h>
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/os/PeriodicThread.h>
 #include <yarp/dev/IMultipleWrapper.h>
@@ -48,10 +50,12 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     std::vector<std::string> axesNames;
     yarp::dev::PolyDriver driver;
     yarp::dev::IEncoders* iEnc{nullptr};
+    yarp::dev::IMotorEncoders* iMotorEnc{nullptr};
+    yarp::dev::IPidControl* iPid{nullptr};
     yarp::dev::IMultipleWrapper* iMultWrap{nullptr};
     yarp::dev::IPositionControl* iPos{nullptr};
     yarp::dev::IAxisInfo* iAxis{nullptr};
-    std::vector<double> jointsPos, jointsVel, jointsAcc;
+    std::vector<double> jointsPos, jointsVel, jointsAcc, motorPos, motorVel, motorAcc, jointPosRef, jointPosErr;
     int axes;
     std::mutex rerunMutex;
     std::string urdfPath, robotName, urdfFileName{"model.urdf"};

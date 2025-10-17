@@ -2,6 +2,8 @@
 |:---------------:|:------------------:|:---------------:|:-------:|:--------------:|:--------:|:----------------------------------------------:|:--------------------------------:|
 |                 | axesNames          | vector<string>  | -       |                |  Yes     |                                                |
 |                 | logIEncoders       | bool            | -       |                |  Yes     |                                                |
+|                 | logIMotorEncoders  | bool            | -       |                |  Yes     |                                                |
+|                 | logIPidControl     | bool            | -       |                |  Yes     |                                                |
 |                 | logURDF            | bool            | -       |                |  Yes     |                                                |
 |                 | fileName           | string          | -       |                |  Yes     |                                                |
 |                 | filePath           | string          | -       |                |  Yes     |                                                |
