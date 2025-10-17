@@ -18,6 +18,8 @@
 #include <yarp/dev/IPositionControl.h>
 #include <yarp/dev/IAxisInfo.h>
 
+#include "YarpLoggerRerun_ParamsParser.h"
+
 #include <rerun.hpp>
 #include <rerun/demo_utils.hpp>
 
@@ -25,7 +27,8 @@ YARP_DECLARE_LOG_COMPONENT(YARP_LOGGER_RERUN)
 
 class YarpLoggerRerun : public yarp::dev::DeviceDriver,
                         public yarp::os::PeriodicThread,
-                        public yarp::dev::IMultipleWrapper {
+                        public yarp::dev::IMultipleWrapper,
+                        public YarpLoggerRerun_ParamsParser {
     public:
     YarpLoggerRerun();
     ~YarpLoggerRerun() override;
@@ -40,7 +43,6 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     private:
     void configureRerun(rerun::RecordingStream& rr);
     bool attachAllControlBoards(const yarp::dev::PolyDriverList& pList);
-    bool loadConfig(yarp::os::Searchable& config);
 
     rerun::RecordingStream recordingStream{"logger_app_id_" + std::to_string(yarp::os::Time::now()), "logger_recording_id"};
     std::vector<std::string> axesNames;
@@ -50,12 +52,9 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     yarp::dev::IPositionControl* iPos{nullptr};
     yarp::dev::IAxisInfo* iAxis{nullptr};
     std::vector<double> jointsPos, jointsVel, jointsAcc;
-    bool logIEncodersOption {false};
-    bool logURDFOption {false};
-    bool saveToFile{false};
     int axes;
     std::mutex rerunMutex;
-    std::string urdfPath, fileName, robotName, urdfFileName{"model.urdf"}, viewerIp, filePath;
+    std::string urdfPath, robotName, urdfFileName{"model.urdf"};
 };
 
 #endif // YARP_LOGGER_RERUN_H
