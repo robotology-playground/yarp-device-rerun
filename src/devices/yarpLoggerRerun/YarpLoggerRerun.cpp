@@ -26,11 +26,6 @@ YarpLoggerRerun::~YarpLoggerRerun()
 bool YarpLoggerRerun::open(yarp::os::Searchable& config) 
 {
     yCInfo(YARP_LOGGER_RERUN) << "Configuring Rerun visualizer...";
-    
-    if(!parseParams(config)) {
-        yCError(YARP_LOGGER_RERUN) << "Error parsing parameters";
-        return false;
-    }
 
     yarp::os::Property conf;
     conf.fromString(config.toString().c_str());
@@ -61,7 +56,7 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
     
     }
     yarp::os::ResourceFinder & rf = yarp::os::ResourceFinder::getResourceFinderSingleton();
-    urdfPath = rf.findFileByName(m_urdf);
+    urdfPath = rf.findFileByName(urdfFileName);
 
     configureRerun(recordingStream);
 
@@ -102,11 +97,11 @@ void YarpLoggerRerun::run()
         yCError(YARP_LOGGER_RERUN) << "Failed to get joints velocities!";
         return;
     }
-    // if (!iEnc->getEncoderAccelerations(jointsAcc.data()))
-    // {
-    //     yCError(YARP_LOGGER_RERUN) << "Failed to get joints accelerations!";
-    //     return;
-    // }
+    if (!iEnc->getEncoderAccelerations(jointsAcc.data()))
+    {
+        yCError(YARP_LOGGER_RERUN) << "Failed to get joints accelerations!";
+        return;
+    }
 
     if (logIEncodersOption)
     {
@@ -114,7 +109,7 @@ void YarpLoggerRerun::run()
         {
             recordingStream.log("encoders/" + axesNames[i], rerun::Scalars(jointsPos[i]));
             recordingStream.log("velocities/" + axesNames[i], rerun::Scalars(jointsVel[i]));
-            // recordingStream.log("accelerations/" + axesNames[i], rerun::Scalars(jointsAcc[i]));
+            recordingStream.log("accelerations/" + axesNames[i], rerun::Scalars(jointsAcc[i]));
         }
     }
 }
@@ -140,9 +135,26 @@ bool YarpLoggerRerun::loadConfig(yarp::os::Searchable& config)
         logURDFOption = prop.find("logURDF").asBool();
     }
     
+    if (prop.check("saveToFile"))
+    {
+        saveToFile = prop.find("saveToFile").asBool();
+    }
+    
     if (prop.check("fileName"))
     {
         fileName = prop.find("fileName").asString();
+    }
+    if (prop.check("robotName"))
+    {
+        robotName = prop.find("robotName").asString();
+    }
+    if (prop.check("viewerIp"))
+    {
+        viewerIp = prop.find("viewerIp").asString();
+    }
+    if (prop.check("filePath"))
+    {
+        filePath = prop.find("filePath").asString();
     }
 
     return true;
@@ -151,20 +163,20 @@ bool YarpLoggerRerun::loadConfig(yarp::os::Searchable& config)
 void YarpLoggerRerun::configureRerun(rerun::RecordingStream& recordingStream) 
 {
     recordingStream.spawn();
-    if (m_saveToFile && !fileName.empty())
+    if (saveToFile && !fileName.empty())
     {
         yCInfo(YARP_LOGGER_RERUN) << "Start saving log to file";
-        recordingStream.set_sinks(rerun::GrpcSink{"rerun+http://" + m_viewer_ip + ":9876/proxy"}, rerun::FileSink{fileName + ".rrd"});
+        recordingStream.set_sinks(rerun::GrpcSink{"rerun+http://" + viewerIp + ":9876/proxy"}, rerun::FileSink{filePath + fileName + ".rrd"});
     }
     else
     {
         yCInfo(YARP_LOGGER_RERUN) << "Only realtime streaming, no file saving";
-        recordingStream.set_sinks(rerun::GrpcSink{"rerun+http://" + m_viewer_ip + ":9876/proxy"});
+        recordingStream.set_sinks(rerun::GrpcSink{"rerun+http://" + viewerIp + ":9876/proxy"});
     }
     
     if (logURDFOption)
     {
-        recordingStream.log_file_from_path(urdfPath, m_robot, true);
+        recordingStream.log_file_from_path(urdfPath, robotName, true);
     }
 }
 

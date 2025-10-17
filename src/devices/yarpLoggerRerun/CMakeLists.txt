@@ -13,16 +13,13 @@ yarp_prepare_plugin(yarpLoggerRerun
                     CATEGORY device
                     TYPE YarpLoggerRerun
                     INCLUDE YarpLoggerRerun.h
-                    DEFAULT ON
-                    GENERATE_PARSER)
+                    DEFAULT ON)
 
 if(ENABLE_yarpLoggerRerun)
     yarp_add_plugin(yarpLoggerRerun)
 
     target_sources(yarpLoggerRerun PRIVATE  YarpLoggerRerun.cpp
-                                            YarpLoggerRerun.h
-                                            YarpLoggerRerun_ParamsParser.cpp
-                                            YarpLoggerRerun_ParamsParser.h)
+                                            YarpLoggerRerun.h)
 
     target_link_libraries(yarpLoggerRerun PUBLIC  YARP::YARP_os
                                                         YARP::YARP_dev

@@ -21,14 +21,11 @@
 #include <rerun.hpp>
 #include <rerun/demo_utils.hpp>
 
-#include "YarpLoggerRerun_ParamsParser.h"
-
 YARP_DECLARE_LOG_COMPONENT(YARP_LOGGER_RERUN)
 
 class YarpLoggerRerun : public yarp::dev::DeviceDriver,
                         public yarp::os::PeriodicThread,
-                        public yarp::dev::IMultipleWrapper,
-                        public YarpLoggerRerun_ParamsParser {
+                        public yarp::dev::IMultipleWrapper {
     public:
     YarpLoggerRerun();
     ~YarpLoggerRerun() override;
@@ -55,9 +52,10 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     std::vector<double> jointsPos, jointsVel, jointsAcc;
     bool logIEncodersOption {false};
     bool logURDFOption {false};
+    bool saveToFile{false};
     int axes;
     std::mutex rerunMutex;
-    std::string urdfPath, fileName;
+    std::string urdfPath, fileName, robotName, urdfFileName{"model.urdf"}, viewerIp, filePath;
 };
 
 #endif // YARP_LOGGER_RERUN_H
