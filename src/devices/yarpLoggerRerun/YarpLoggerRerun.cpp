@@ -83,51 +83,24 @@ bool YarpLoggerRerun::close()
 
 void YarpLoggerRerun::run()
 {
-    if (!iEnc->getEncoders(jointsPos.data()))
-    {
-        yCError(YARP_LOGGER_RERUN) << "Failed to get encoders!";
-        return;
-    }
-    if (!iEnc->getEncoderSpeeds(jointsVel.data()))
-    {
-        yCError(YARP_LOGGER_RERUN) << "Failed to get joints velocities!";
-        return;
-    }
-    if (!iEnc->getEncoderAccelerations(jointsAcc.data()))
-    {
-        yCError(YARP_LOGGER_RERUN) << "Failed to get joints accelerations!";
-        return;
-    }
-
-    if (!iMotorEnc->getMotorEncoders(motorPos.data()))
-    {
-        yCError(YARP_LOGGER_RERUN) << "Failed to get motor encoders!";
-        return;
-    }
-    if (!iMotorEnc->getMotorEncoderSpeeds(motorVel.data()))
-    {
-        yCError(YARP_LOGGER_RERUN) << "Failed to get motor velocities!";
-        return;
-    }
-    if (!iMotorEnc->getMotorEncoderAccelerations(motorAcc.data()))
-    {
-        yCError(YARP_LOGGER_RERUN) << "Failed to get motor accelerations!";
-        return;
-    }
-    
-    if (!iPid->getPidReferences(yarp::dev::VOCAB_PIDTYPE_POSITION, jointPosRef.data()))
-    {
-        yCError(YARP_LOGGER_RERUN) << "Failed to get joints position references!";
-        return;
-    }
-    if (!iPid->getPidErrors(yarp::dev::VOCAB_PIDTYPE_POSITION, jointPosErr.data()))
-    {
-        yCError(YARP_LOGGER_RERUN) << "Failed to get joints position errors!";
-        return;
-    }
-
     if (m_logIMotorEncoders)
     {
+        if (!iMotorEnc->getMotorEncoders(motorPos.data()))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Failed to get motor encoders!";
+            return;
+        }
+        if (!iMotorEnc->getMotorEncoderSpeeds(motorVel.data()))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Failed to get motor velocities!";
+            return;
+        }
+        if (!iMotorEnc->getMotorEncoderAccelerations(motorAcc.data()))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Failed to get motor accelerations!";
+            return;
+        }
+
         for (size_t i = 0; i < m_axesNames.size(); ++i) 
         {
             recordingStream.log("motorEncoders/" + m_axesNames[i], rerun::Scalars(motorPos[i]));
@@ -137,6 +110,22 @@ void YarpLoggerRerun::run()
     }
     if (m_logIEncoders)
     {
+        if (!iEnc->getEncoders(jointsPos.data()))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Failed to get encoders!";
+            return;
+        }
+        if (!iEnc->getEncoderSpeeds(jointsVel.data()))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Failed to get joints velocities!";
+            return;
+        }
+        if (!iEnc->getEncoderAccelerations(jointsAcc.data()))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Failed to get joints accelerations!";
+            return;
+        }
+        
         for (size_t i = 0; i < m_axesNames.size(); ++i) 
         {
             recordingStream.log("encoders/" + m_axesNames[i], rerun::Scalars(jointsPos[i]));
@@ -146,6 +135,16 @@ void YarpLoggerRerun::run()
     }
     if (m_logIPidControl)
     {
+        if (!iPid->getPidReferences(yarp::dev::VOCAB_PIDTYPE_POSITION, jointPosRef.data()))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Failed to get joints position references!";
+            return;
+        }
+        if (!iPid->getPidErrors(yarp::dev::VOCAB_PIDTYPE_POSITION, jointPosErr.data()))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Failed to get joints position errors!";
+            return;
+        }
         for (size_t i = 0; i < m_axesNames.size(); ++i) 
         {
             recordingStream.log("encoders/ref/" + m_axesNames[i], rerun::Scalars(jointPosRef[i]));
