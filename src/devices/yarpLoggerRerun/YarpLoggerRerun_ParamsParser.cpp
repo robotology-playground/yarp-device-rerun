@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Fri Oct 17 15:17:35 2025
+// Generated on: Mon Oct 20 10:23:56 2025
 
 
 #include "YarpLoggerRerun_ParamsParser.h"
@@ -158,8 +158,7 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         }
         else
         {
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'logIEncoders' not found!";
-            return false;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIEncoders' using DEFAULT value:" << m_logIEncoders;
         }
         prop_check.unput("logIEncoders");
     }
@@ -173,8 +172,7 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         }
         else
         {
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'logIMotorEncoders' not found!";
-            return false;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIMotorEncoders' using DEFAULT value:" << m_logIMotorEncoders;
         }
         prop_check.unput("logIMotorEncoders");
     }
@@ -188,8 +186,7 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         }
         else
         {
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'logIPidControl' not found!";
-            return false;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIPidControl' using DEFAULT value:" << m_logIPidControl;
         }
         prop_check.unput("logIPidControl");
     }
@@ -203,8 +200,7 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         }
         else
         {
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'logURDF' not found!";
-            return false;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logURDF' using DEFAULT value:" << m_logURDF;
         }
         prop_check.unput("logURDF");
     }
@@ -218,8 +214,7 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         }
         else
         {
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'fileName' not found!";
-            return false;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'fileName' using DEFAULT value:" << m_fileName;
         }
         prop_check.unput("fileName");
     }
@@ -233,8 +228,7 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         }
         else
         {
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'filePath' not found!";
-            return false;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'filePath' using DEFAULT value:" << m_filePath;
         }
         prop_check.unput("filePath");
     }
@@ -248,8 +242,7 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         }
         else
         {
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'saveToFile' not found!";
-            return false;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'saveToFile' using DEFAULT value:" << m_saveToFile;
         }
         prop_check.unput("saveToFile");
     }
@@ -263,8 +256,7 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         }
         else
         {
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'viewerIp' not found!";
-            return false;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'viewerIp' using DEFAULT value:" << m_viewerIp;
         }
         prop_check.unput("viewerIp");
     }
@@ -316,8 +308,8 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("'viewerIp': \n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders <mandatory_value> --logIMotorEncoders <mandatory_value> --logIPidControl <mandatory_value> --logURDF <mandatory_value> --fileName <mandatory_value> --filePath <mandatory_value> --saveToFile <mandatory_value> --viewerIp <mandatory_value>\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost\n";
     doc = doc + std::string("Using only mandatory params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders <mandatory_value> --logIMotorEncoders <mandatory_value> --logIPidControl <mandatory_value> --logURDF <mandatory_value> --fileName <mandatory_value> --filePath <mandatory_value> --saveToFile <mandatory_value> --viewerIp <mandatory_value>\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
 }

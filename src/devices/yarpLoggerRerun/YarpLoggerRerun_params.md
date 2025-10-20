@@ -1,11 +1,11 @@
-| Group name      | Parameter name     | Type            | Units   | Default Value  | Required | Description                                    | Notes                            |
-|:---------------:|:------------------:|:---------------:|:-------:|:--------------:|:--------:|:----------------------------------------------:|:--------------------------------:|
-|                 | axesNames          | vector<string>  | -       |                |  Yes     |                                                |
-|                 | logIEncoders       | bool            | -       |                |  Yes     |                                                |
-|                 | logIMotorEncoders  | bool            | -       |                |  Yes     |                                                |
-|                 | logIPidControl     | bool            | -       |                |  Yes     |                                                |
-|                 | logURDF            | bool            | -       |                |  Yes     |                                                |
-|                 | fileName           | string          | -       |                |  Yes     |                                                |
-|                 | filePath           | string          | -       |                |  Yes     |                                                |
-|                 | saveToFile         | bool            | -       |                |  Yes     |                                                |
-|                 | viewerIp           | string          | -       |                |  Yes     |                                                |
+| Group name      | Parameter name     | Type            | Units   | Default Value    | Required | Description                                    | Notes                            |
+|:---------------:|:------------------:|:---------------:|:-------:|:----------------:|:--------:|:----------------------------------------------:|:--------------------------------:|
+|                 | axesNames          | vector<string>  | -       |                  |  Yes     |                                                |
+|                 | logIEncoders       | bool            | -       |     true         |  No      |                                                |
+|                 | logIMotorEncoders  | bool            | -       |     false        |  No      |                                                |
+|                 | logIPidControl     | bool            | -       |     false        |  No      |                                                |
+|                 | logURDF            | bool            | -       |     false        |  No      |                                                |
+|                 | fileName           | string          | -       |     log_test     |  No      |                                                |
+|                 | filePath           | string          | -       |/home/ergocub/test|  No      |                                                |
+|                 | saveToFile         | bool            | -       |     false        |  No      |                                                |
+|                 | viewerIp           | string          | -       |    localhost     |  No      |                                                |

@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Fri Oct 17 15:17:35 2025
+// Generated on: Mon Oct 20 10:23:56 2025
 
 
 #ifndef YARPLOGGERRERUN_PARAMSPARSER_H
@@ -23,25 +23,25 @@
 * This class is the parameters parser for class YarpLoggerRerun.
 *
 * These are the used parameters:
-* | Group name | Parameter name    | Type           | Units | Default Value | Required | Description | Notes |
-* |:----------:|:-----------------:|:--------------:|:-----:|:-------------:|:--------:|:-----------:|:-----:|
-* | -          | axesNames         | vector<string> | -     | -             | 1        | -           | -     |
-* | -          | logIEncoders      | bool           | -     | -             | 1        | -           | -     |
-* | -          | logIMotorEncoders | bool           | -     | -             | 1        | -           | -     |
-* | -          | logIPidControl    | bool           | -     | -             | 1        | -           | -     |
-* | -          | logURDF           | bool           | -     | -             | 1        | -           | -     |
-* | -          | fileName          | string         | -     | -             | 1        | -           | -     |
-* | -          | filePath          | string         | -     | -             | 1        | -           | -     |
-* | -          | saveToFile        | bool           | -     | -             | 1        | -           | -     |
-* | -          | viewerIp          | string         | -     | -             | 1        | -           | -     |
+* | Group name | Parameter name    | Type           | Units | Default Value      | Required | Description | Notes |
+* |:----------:|:-----------------:|:--------------:|:-----:|:------------------:|:--------:|:-----------:|:-----:|
+* | -          | axesNames         | vector<string> | -     | -                  | 1        | -           | -     |
+* | -          | logIEncoders      | bool           | -     | true               | 0        | -           | -     |
+* | -          | logIMotorEncoders | bool           | -     | false              | 0        | -           | -     |
+* | -          | logIPidControl    | bool           | -     | false              | 0        | -           | -     |
+* | -          | logURDF           | bool           | -     | false              | 0        | -           | -     |
+* | -          | fileName          | string         | -     | log_test           | 0        | -           | -     |
+* | -          | filePath          | string         | -     | /home/ergocub/test | 0        | -           | -     |
+* | -          | saveToFile        | bool           | -     | false              | 0        | -           | -     |
+* | -          | viewerIp          | string         | -     | localhost          | 0        | -           | -     |
 *
 * The device can be launched by yarpdev using one of the following examples (with and without all optional parameters):
 * \code{.unparsed}
-* yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders <mandatory_value> --logIMotorEncoders <mandatory_value> --logIPidControl <mandatory_value> --logURDF <mandatory_value> --fileName <mandatory_value> --filePath <mandatory_value> --saveToFile <mandatory_value> --viewerIp <mandatory_value>
+* yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost
 * \endcode
 *
 * \code{.unparsed}
-* yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders <mandatory_value> --logIMotorEncoders <mandatory_value> --logIPidControl <mandatory_value> --logURDF <mandatory_value> --fileName <mandatory_value> --filePath <mandatory_value> --saveToFile <mandatory_value> --viewerIp <mandatory_value>
+* yarpdev --device yarpLoggerRerun --axesNames <mandatory_value>
 * \endcode
 *
 */
@@ -66,24 +66,24 @@ public:
     std::string m_provided_configuration;
 
     const std::string m_axesNames_defaultValue = {""};
-    const std::string m_logIEncoders_defaultValue = {""};
-    const std::string m_logIMotorEncoders_defaultValue = {""};
-    const std::string m_logIPidControl_defaultValue = {""};
-    const std::string m_logURDF_defaultValue = {""};
-    const std::string m_fileName_defaultValue = {""};
-    const std::string m_filePath_defaultValue = {""};
-    const std::string m_saveToFile_defaultValue = {""};
-    const std::string m_viewerIp_defaultValue = {""};
+    const std::string m_logIEncoders_defaultValue = {"true"};
+    const std::string m_logIMotorEncoders_defaultValue = {"false"};
+    const std::string m_logIPidControl_defaultValue = {"false"};
+    const std::string m_logURDF_defaultValue = {"false"};
+    const std::string m_fileName_defaultValue = {"log_test"};
+    const std::string m_filePath_defaultValue = {"/home/ergocub/test"};
+    const std::string m_saveToFile_defaultValue = {"false"};
+    const std::string m_viewerIp_defaultValue = {"localhost"};
 
     std::vector<std::string> m_axesNames = {}; //This default value is autogenerated. It is highly recommended to provide a suggested value also for mandatory parameters.
-    bool m_logIEncoders = {false}; //This default value is autogenerated. It is highly recommended to provide a suggested value also for mandatory parameters.
-    bool m_logIMotorEncoders = {false}; //This default value is autogenerated. It is highly recommended to provide a suggested value also for mandatory parameters.
-    bool m_logIPidControl = {false}; //This default value is autogenerated. It is highly recommended to provide a suggested value also for mandatory parameters.
-    bool m_logURDF = {false}; //This default value is autogenerated. It is highly recommended to provide a suggested value also for mandatory parameters.
-    std::string m_fileName = {}; //This default value is autogenerated. It is highly recommended to provide a suggested value also for mandatory parameters.
-    std::string m_filePath = {}; //This default value is autogenerated. It is highly recommended to provide a suggested value also for mandatory parameters.
-    bool m_saveToFile = {false}; //This default value is autogenerated. It is highly recommended to provide a suggested value also for mandatory parameters.
-    std::string m_viewerIp = {}; //This default value is autogenerated. It is highly recommended to provide a suggested value also for mandatory parameters.
+    bool m_logIEncoders = {true};
+    bool m_logIMotorEncoders = {false};
+    bool m_logIPidControl = {false};
+    bool m_logURDF = {false};
+    std::string m_fileName = {"log_test"};
+    std::string m_filePath = {"/home/ergocub/test"};
+    bool m_saveToFile = {false};
+    std::string m_viewerIp = {"localhost"};
 
     bool          parseParams(const yarp::os::Searchable & config) override;
     std::string   getDeviceClassName() const override { return m_device_classname; }
