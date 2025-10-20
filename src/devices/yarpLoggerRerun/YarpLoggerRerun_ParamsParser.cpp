@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Mon Oct 13 10:21:40 2025
+// Generated on: Mon Oct 20 10:26:43 2025
 
 
 #include "YarpLoggerRerun_ParamsParser.h"
@@ -28,36 +28,57 @@ YarpLoggerRerun_ParamsParser::YarpLoggerRerun_ParamsParser()
 std::vector<std::string> YarpLoggerRerun_ParamsParser::getListOfParams() const
 {
     std::vector<std::string> params;
-    params.push_back("robot");
-    params.push_back("remote");
-    params.push_back("urdf");
-    params.push_back("viewer_ip");
-    params.push_back("saveToFile");
+    params.push_back("axesNames");
     params.push_back("logIEncoders");
+    params.push_back("logIMotorEncoders");
+    params.push_back("logIPidControl");
+    params.push_back("logURDF");
+    params.push_back("fileName");
+    params.push_back("filePath");
+    params.push_back("saveToFile");
+    params.push_back("viewerIp");
     return params;
 }
 
 
 bool YarpLoggerRerun_ParamsParser::getParamValue(const std::string& paramName, std::string& paramValue) const
 {
-    if (paramName =="robot")
+    if (paramName =="axesNames")
     {
-        paramValue = m_robot;
+        return false;
+    }
+    if (paramName =="logIEncoders")
+    {
+        if (m_logIEncoders==true) paramValue = "true";
+        else paramValue = "false";
         return true;
     }
-    if (paramName =="remote")
+    if (paramName =="logIMotorEncoders")
     {
-        paramValue = m_remote;
+        if (m_logIMotorEncoders==true) paramValue = "true";
+        else paramValue = "false";
         return true;
     }
-    if (paramName =="urdf")
+    if (paramName =="logIPidControl")
     {
-        paramValue = m_urdf;
+        if (m_logIPidControl==true) paramValue = "true";
+        else paramValue = "false";
         return true;
     }
-    if (paramName =="viewer_ip")
+    if (paramName =="logURDF")
     {
-        paramValue = m_viewer_ip;
+        if (m_logURDF==true) paramValue = "true";
+        else paramValue = "false";
+        return true;
+    }
+    if (paramName =="fileName")
+    {
+        paramValue = m_fileName;
+        return true;
+    }
+    if (paramName =="filePath")
+    {
+        paramValue = m_filePath;
         return true;
     }
     if (paramName =="saveToFile")
@@ -66,10 +87,9 @@ bool YarpLoggerRerun_ParamsParser::getParamValue(const std::string& paramName, s
         else paramValue = "false";
         return true;
     }
-    if (paramName =="logIEncoders")
+    if (paramName =="viewerIp")
     {
-        if (m_logIEncoders==true) paramValue = "true";
-        else paramValue = "false";
+        paramValue = m_viewerIp;
         return true;
     }
 
@@ -99,64 +119,118 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
 
     m_provided_configuration = config.toString();
     yarp::os::Property prop_check(m_provided_configuration.c_str());
-    //Parser of parameter robot
+    //Parser of parameter axesNames
     {
-        if (config.check("robot"))
+        if (config.check("axesNames"))
         {
-            m_robot = config.find("robot").asString();
-            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'robot' using value:" << m_robot;
+            {
+                m_axesNames.clear();
+                yarp::os::Bottle* tempBot = config.find("axesNames").asList();
+                if (tempBot)
+                {
+                    std::string tempBots = tempBot->toString();
+                    for (size_t i=0; i<tempBot->size(); i++)
+                    {
+                        m_axesNames.push_back(tempBot->get(i).asString());
+                    }
+                }
+                else
+                {
+                     yCError(YarpLoggerRerunParamsCOMPONENT) <<"parameter 'axesNames' is not a properly formatted bottle";
+                }
+            }
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'axesNames' using value:" << m_axesNames;
         }
         else
         {
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'robot' not found!";
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Description of the parameter: Name of the robot";
+            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'axesNames' not found!";
             return false;
         }
-        prop_check.unput("robot");
+        prop_check.unput("axesNames");
     }
 
-    //Parser of parameter remote
+    //Parser of parameter logIEncoders
     {
-        if (config.check("remote"))
+        if (config.check("logIEncoders"))
         {
-            m_remote = config.find("remote").asString();
-            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'remote' using value:" << m_remote;
+            m_logIEncoders = config.find("logIEncoders").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIEncoders' using value:" << m_logIEncoders;
         }
         else
         {
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'remote' not found!";
-            yCError(YarpLoggerRerunParamsCOMPONENT) << "Description of the parameter: Name of the port to attach to";
-            return false;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIEncoders' using DEFAULT value:" << m_logIEncoders;
         }
-        prop_check.unput("remote");
+        prop_check.unput("logIEncoders");
     }
 
-    //Parser of parameter urdf
+    //Parser of parameter logIMotorEncoders
     {
-        if (config.check("urdf"))
+        if (config.check("logIMotorEncoders"))
         {
-            m_urdf = config.find("urdf").asString();
-            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'urdf' using value:" << m_urdf;
+            m_logIMotorEncoders = config.find("logIMotorEncoders").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIMotorEncoders' using value:" << m_logIMotorEncoders;
         }
         else
         {
-            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'urdf' using DEFAULT value:" << m_urdf;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIMotorEncoders' using DEFAULT value:" << m_logIMotorEncoders;
         }
-        prop_check.unput("urdf");
+        prop_check.unput("logIMotorEncoders");
     }
 
-    //Parser of parameter viewer_ip
+    //Parser of parameter logIPidControl
     {
-        if (config.check("viewer_ip"))
+        if (config.check("logIPidControl"))
         {
-            m_viewer_ip = config.find("viewer_ip").asString();
-            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'viewer_ip' using value:" << m_viewer_ip;
+            m_logIPidControl = config.find("logIPidControl").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIPidControl' using value:" << m_logIPidControl;
         }
         else
         {
-            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'viewer_ip' using DEFAULT value:" << m_viewer_ip;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIPidControl' using DEFAULT value:" << m_logIPidControl;
         }
-        prop_check.unput("viewer_ip");
+        prop_check.unput("logIPidControl");
+    }
+
+    //Parser of parameter logURDF
+    {
+        if (config.check("logURDF"))
+        {
+            m_logURDF = config.find("logURDF").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logURDF' using value:" << m_logURDF;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logURDF' using DEFAULT value:" << m_logURDF;
+        }
+        prop_check.unput("logURDF");
+    }
+
+    //Parser of parameter fileName
+    {
+        if (config.check("fileName"))
+        {
+            m_fileName = config.find("fileName").asString();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'fileName' using value:" << m_fileName;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'fileName' using DEFAULT value:" << m_fileName;
+        }
+        prop_check.unput("fileName");
+    }
+
+    //Parser of parameter filePath
+    {
+        if (config.check("filePath"))
+        {
+            m_filePath = config.find("filePath").asString();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'filePath' using value:" << m_filePath;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'filePath' using DEFAULT value:" << m_filePath;
+        }
+        prop_check.unput("filePath");
     }
 
     //Parser of parameter saveToFile
@@ -173,18 +247,18 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         prop_check.unput("saveToFile");
     }
 
-    //Parser of parameter logIEncoders
+    //Parser of parameter viewerIp
     {
-        if (config.check("logIEncoders"))
+        if (config.check("viewerIp"))
         {
-            m_logIEncoders = config.find("logIEncoders").asBool();
-            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIEncoders' using value:" << m_logIEncoders;
+            m_viewerIp = config.find("viewerIp").asString();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'viewerIp' using value:" << m_viewerIp;
         }
         else
         {
-            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIEncoders' using DEFAULT value:" << m_logIEncoders;
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'viewerIp' using DEFAULT value:" << m_viewerIp;
         }
-        prop_check.unput("logIEncoders");
+        prop_check.unput("viewerIp");
     }
 
     /*
@@ -223,16 +297,19 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("This is the help for device: YarpLoggerRerun\n");
     doc = doc + std::string("\n");
     doc = doc + std::string("This is the list of the parameters accepted by the device:\n");
-    doc = doc + std::string("'robot': Name of the robot\n");
-    doc = doc + std::string("'remote': Name of the port to attach to\n");
-    doc = doc + std::string("'urdf': \n");
-    doc = doc + std::string("'viewer_ip': \n");
-    doc = doc + std::string("'saveToFile': \n");
+    doc = doc + std::string("'axesNames': \n");
     doc = doc + std::string("'logIEncoders': \n");
+    doc = doc + std::string("'logIMotorEncoders': \n");
+    doc = doc + std::string("'logIPidControl': \n");
+    doc = doc + std::string("'logURDF': \n");
+    doc = doc + std::string("'fileName': \n");
+    doc = doc + std::string("'filePath': \n");
+    doc = doc + std::string("'saveToFile': \n");
+    doc = doc + std::string("'viewerIp': \n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --robot <mandatory_value> --remote <mandatory_value> --urdf model.urdf --viewer_ip localhost --saveToFile false --logIEncoders true\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost\n";
     doc = doc + std::string("Using only mandatory params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --robot <mandatory_value> --remote <mandatory_value>\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
 }

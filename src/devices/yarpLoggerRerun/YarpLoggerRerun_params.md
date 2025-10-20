@@ -1,8 +1,11 @@
-| Group name      | Parameter name     | Type            | Units   | Default Value  | Required | Description                                    | Notes                            |
-|:---------------:|:------------------:|:---------------:|:-------:|:--------------:|:--------:|:----------------------------------------------:|:--------------------------------:|
-|                 | robot              | string          | -       |                |  Yes     | Name of the robot                               |
-|                 | remote             | string          | -       |                |  Yes     | Name of the port to attach to                   |
-|                 | urdf               | string          | -       |   model.urdf   |  No      |                   |
-|                 | viewer_ip          | string          | -       |   localhost    |  No      |                   |
-|                 | saveToFile         | bool            | -       |      false     |  No      |                                                 |
-|                 | logIEncoders       | bool            | -       |      true      |  No      |                                                 |
+| Group name      | Parameter name     | Type            | Units   | Default Value    | Required | Description                                    | Notes                            |
+|:---------------:|:------------------:|:---------------:|:-------:|:----------------:|:--------:|:----------------------------------------------:|:--------------------------------:|
+|                 | axesNames          | vector<string>  | -       |                  |  Yes     |                                                |
+|                 | logIEncoders       | bool            | -       |     true         |  No      |                                                |
+|                 | logIMotorEncoders  | bool            | -       |     false        |  No      |                                                |
+|                 | logIPidControl     | bool            | -       |     false        |  No      |                                                |
+|                 | logURDF            | bool            | -       |     false        |  No      |                                                |
+|                 | fileName           | string          | -       |     log_test     |  No      |                                                |
+|                 | filePath           | string          | -       |/home/ergocub/test|  No      |                                                |
+|                 | saveToFile         | bool            | -       |     false        |  No      |                                                |
+|                 | viewerIp           | string          | -       |    localhost     |  No      |                                                |

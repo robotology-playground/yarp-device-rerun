@@ -12,17 +12,25 @@
 #include <yarp/dev/DeviceDriver.h>
 #include <yarp/os/LogStream.h>
 #include <yarp/dev/IEncoders.h>
+#include <yarp/dev/IMotorEncoders.h>
+#include <yarp/dev/IPidControl.h>
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/os/PeriodicThread.h>
+#include <yarp/dev/IMultipleWrapper.h>
+#include <yarp/dev/IPositionControl.h>
+#include <yarp/dev/IAxisInfo.h>
+
+#include "YarpLoggerRerun_ParamsParser.h"
 
 #include <rerun.hpp>
 #include <rerun/demo_utils.hpp>
 
-#include "YarpLoggerRerun_ParamsParser.h"
-
 YARP_DECLARE_LOG_COMPONENT(YARP_LOGGER_RERUN)
 
-class YarpLoggerRerun : public yarp::dev::DeviceDriver, public yarp::os::PeriodicThread, public YarpLoggerRerun_ParamsParser {
+class YarpLoggerRerun : public yarp::dev::DeviceDriver,
+                        public yarp::os::PeriodicThread,
+                        public yarp::dev::IMultipleWrapper,
+                        public YarpLoggerRerun_ParamsParser {
     public:
     YarpLoggerRerun();
     ~YarpLoggerRerun() override;
@@ -31,17 +39,26 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver, public yarp::os::Periodi
     bool open(yarp::os::Searchable& config) override;
     void run() override;
 
+    bool attachAll(const yarp::dev::PolyDriverList& driverList) override;
+    bool detachAll() override;
+
     private:
     void configureRerun(rerun::RecordingStream& rr);
+    bool attachAllControlBoards(const yarp::dev::PolyDriverList& pList);
 
     rerun::RecordingStream recordingStream{"logger_app_id_" + std::to_string(yarp::os::Time::now()), "logger_recording_id"};
     std::vector<std::string> axesNames;
     yarp::dev::PolyDriver driver;
     yarp::dev::IEncoders* iEnc{nullptr};
-    std::vector<double> jointsPos, jointsVel, jointsAcc;
+    yarp::dev::IMotorEncoders* iMotorEnc{nullptr};
+    yarp::dev::IPidControl* iPid{nullptr};
+    yarp::dev::IMultipleWrapper* iMultWrap{nullptr};
+    yarp::dev::IPositionControl* iPos{nullptr};
+    yarp::dev::IAxisInfo* iAxis{nullptr};
+    std::vector<double> jointsPos, jointsVel, jointsAcc, motorPos, motorVel, motorAcc, jointPosRef, jointPosErr;
     int axes;
     std::mutex rerunMutex;
-    std::string urdfPath;
+    std::string urdfPath, robotName, urdfFileName{"model.urdf"};
 };
 
 #endif // YARP_LOGGER_RERUN_H
