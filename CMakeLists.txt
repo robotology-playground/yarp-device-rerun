@@ -9,6 +9,7 @@ project(yarp-device-rerun LANGUAGES CXX)
 
 find_package(YARP 3.12.0 REQUIRED)
 find_package(YCM REQUIRED)
+find_package(iDynTree REQUIRED COMPONENTS idyntree-model idyntree-modelio idyntree-kinematics)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
