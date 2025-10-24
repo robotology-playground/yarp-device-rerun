@@ -19,6 +19,7 @@
 #include <yarp/dev/IMultipleWrapper.h>
 #include <yarp/dev/IPositionControl.h>
 #include <yarp/dev/IAxisInfo.h>
+#include <yarp/dev/IJointCoupling.h>
 
 #include <iDynTree/Model.h>
 #include <iDynTree/ModelLoader.h>
@@ -54,9 +55,10 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     bool initKinematics(const std::string& urdfPath);
     void updateKinematics();
     std::string getLinkPath(const iDynTree::Model& model, const std::string& targetLink);
+    bool getRotationAxisAndAngle(const iDynTree::Rotation& rot, iDynTree::Vector3& axis, double& angle);
 
     rerun::RecordingStream recordingStream{"logger_app_id_" + std::to_string(yarp::os::Time::now()), "logger_recording_id"};
-    std::vector<std::string> axesNames;
+    std::vector<std::string> actuatedAxesNames;
     yarp::dev::PolyDriver driver;
     yarp::dev::IEncoders* iEnc{nullptr};
     yarp::dev::IMotorEncoders* iMotorEnc{nullptr};
@@ -64,6 +66,7 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     yarp::dev::IMultipleWrapper* iMultWrap{nullptr};
     yarp::dev::IPositionControl* iPos{nullptr};
     yarp::dev::IAxisInfo* iAxis{nullptr};
+    yarp::dev::IJointCoupling* iJointCoupling{nullptr};
     std::vector<double> jointsPos, jointsVel, jointsAcc, motorPos, motorVel, motorAcc, jointPosRef, jointPosErr;
     int axes;
     std::mutex rerunMutex;
