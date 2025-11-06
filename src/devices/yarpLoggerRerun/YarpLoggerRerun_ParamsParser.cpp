@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Fri Oct 31 12:32:41 2025
+// Generated on: Thu Nov  6 09:56:36 2025
 
 
 #include "YarpLoggerRerun_ParamsParser.h"

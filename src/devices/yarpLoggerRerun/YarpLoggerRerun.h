@@ -55,7 +55,6 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     bool initKinematics(const std::string& urdfPath);
     void updateKinematics();
     std::string getLinkPath(const iDynTree::Model& model, const std::string& targetLink);
-    bool getRotationAxisAndAngle(const iDynTree::Rotation& rot, iDynTree::Vector3& axis, double& angle);
 
     rerun::RecordingStream recordingStream{"logger_app_id_" + std::to_string(yarp::os::Time::now()), "logger_recording_id"};
     std::vector<std::string> actuatedAxesNames;

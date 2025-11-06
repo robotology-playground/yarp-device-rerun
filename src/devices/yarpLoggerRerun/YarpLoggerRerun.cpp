@@ -119,17 +119,17 @@ void YarpLoggerRerun::run()
             yCError(YARP_LOGGER_RERUN) << "Failed to get joints velocities!";
             return;
         }
-        // if (!iEnc->getEncoderAccelerations(jointsAcc.data()))
-        // {
-        //     yCError(YARP_LOGGER_RERUN) << "Failed to get joints accelerations!";
-        //     return;
-        // }
+        if (!iEnc->getEncoderAccelerations(jointsAcc.data()))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Failed to get joints accelerations!";
+            return;
+        }
         
         for (size_t i = 0; i < m_axesNames.size(); ++i) 
         {
             recordingStream.log("encoders/" + m_axesNames[i], rerun::Scalars(jointsPos[i]));
             recordingStream.log("velocities/" + m_axesNames[i], rerun::Scalars(jointsVel[i]));
-            // recordingStream.log("accelerations/" + m_axesNames[i], rerun::Scalars(jointsAcc[i]));
+            recordingStream.log("accelerations/" + m_axesNames[i], rerun::Scalars(jointsAcc[i]));
         }
     }
     if (m_logIPidControl)
@@ -155,7 +155,6 @@ void YarpLoggerRerun::run()
         updateKinematics();
         return;
     }
-
 }
 
 void YarpLoggerRerun::configureRerun(rerun::RecordingStream& recordingStream) 
@@ -286,10 +285,6 @@ bool YarpLoggerRerun::initKinematics(const std::string& urdfPath)
 
     auto& model = kinDyn.model();
     model.computeFullTreeTraversal(traversal);
-    yCInfo(YARP_LOGGER_RERUN) << traversal.toString(model);
-
-    double rot_angle;
-    iDynTree::Vector3 rot_axis;
 
     for (size_t l = 0; l < model.getNrOfLinks(); l++)
     {
@@ -300,36 +295,23 @@ bool YarpLoggerRerun::initKinematics(const std::string& urdfPath)
             auto transform = kinDyn.getRelativeTransform(model.getLinkName(parentLink->getIndex()), linkName);
             auto position = transform.getPosition();
             auto rotation = transform.getRotation();
-            // double qx, qy, qz, qw;
-            // rotation.getQuaternion(qw, qx, qy, qz);
-            if (!getRotationAxisAndAngle(rotation, rot_axis, rot_angle))
-            {
-                yCError(YARP_LOGGER_RERUN) << "Failed to extract rotation axis and angle for link" << linkName;
-                return false;
-            }
-            if (rot_angle >= M_PI/2)
-            {
-                rot_angle = M_PI - rot_angle;
-            }
-            yCInfo(YARP_LOGGER_RERUN) << "Link" << linkName << "position:" << position.toString() << "rotation axis:" << rot_axis.toString() << "angle(deg):" << rot_angle;
+            double qx, qy, qz, qw;
+            rotation.getQuaternion(qw, qx, qy, qz);
 
             rerun::components::Translation3D translation(
                 static_cast<float>(position(0)) * 0.001f,
                 static_cast<float>(position(1)) * 0.001f,
                 static_cast<float>(position(2)) * 0.001f
             );
-            // rerun::components::RotationQuat rotation_component = rerun::datatypes::Quaternion::from_wxyz(
-            //     static_cast<float>(qw),
-            //     static_cast<float>(qx),
-            //     static_cast<float>(qy),
-            //     static_cast<float>(qz)
-            // );
-            rerun::components::RotationAxisAngle rotation_component = rerun::datatypes::RotationAxisAngle(rerun::datatypes::Vec3D(static_cast<float>(rot_axis(0)), static_cast<float>(rot_axis(1)), static_cast<float>(rot_axis(2))),
-                rerun::datatypes::Angle::radians(static_cast<float>(rot_angle)));
+            rerun::components::RotationQuat rotation_component = rerun::datatypes::Quaternion::from_wxyz(
+                static_cast<float>(qw),
+                static_cast<float>(qx),
+                static_cast<float>(qy),
+                static_cast<float>(qz)
+            );
 
             std::string path = getLinkPath(model, linkName);
-            // recordingStream.log(path + "/" + linkName, rerun::Transform3D().update_fields().with_translation(translation).with_quaternion(rotation_component));
-            recordingStream.log(path + "/" + linkName, rerun::Transform3D().update_fields().with_translation(translation).with_rotation_axis_angle(rotation_component));
+            recordingStream.log(path + "/" + linkName, rerun::Transform3D().update_fields().with_translation(translation).with_quaternion(rotation_component));
         }
     }
 
@@ -396,35 +378,23 @@ void YarpLoggerRerun::updateKinematics()
             auto position = transform.getPosition();
             auto rotation = transform.getRotation();
 
-            // double qx, qy, qz, qw;
-            // rotation.getQuaternion(qw, qx, qy, qz);
+            double qx, qy, qz, qw;
+            rotation.getQuaternion(qw, qx, qy, qz);
 
-            if (!getRotationAxisAndAngle(rotation, rot_axis, rot_angle))
-            {
-                yCError(YARP_LOGGER_RERUN) << "Failed to extract rotation axis and angle for link" << linkName;
-                return;
-            }
-            if (rot_angle >= M_PI/2)
-            {
-                rot_angle = M_PI - rot_angle;
-            }
             rerun::components::Translation3D translation(
                 static_cast<float>(position(0)) * 0.001f,
                 static_cast<float>(position(1)) * 0.001f,
                 static_cast<float>(position(2)) * 0.001f
             );
-            // rerun::components::RotationQuat rotation_component = rerun::datatypes::Quaternion::from_wxyz(
-            //     static_cast<float>(qw),
-            //     static_cast<float>(qx),
-            //     static_cast<float>(qy),
-            //     static_cast<float>(qz)
-            // );
-            rerun::components::RotationAxisAngle rotation_component = rerun::datatypes::RotationAxisAngle(rerun::datatypes::Vec3D(static_cast<float>(rot_axis(0)), static_cast<float>(rot_axis(1)), static_cast<float>(rot_axis(2))),
-                rerun::datatypes::Angle::radians(static_cast<float>(rot_angle)));
+            rerun::components::RotationQuat rotation_component = rerun::datatypes::Quaternion::from_wxyz(
+                static_cast<float>(qw),
+                static_cast<float>(qx),
+                static_cast<float>(qy),
+                static_cast<float>(qz)
+            );
 
             std::string path = getLinkPath(model, linkName);
-            // recordingStream.log(path + "/" + linkName, rerun::Transform3D().update_fields().with_translation(translation).with_quaternion(rotation_component));
-            recordingStream.log(path + "/" + linkName, rerun::Transform3D().update_fields().with_translation(translation).with_rotation_axis_angle(rotation_component));            
+            recordingStream.log(path + "/" + linkName, rerun::Transform3D().update_fields().with_translation(translation).with_quaternion(rotation_component));        
         }
     }
 
@@ -453,45 +423,4 @@ std::string YarpLoggerRerun::getLinkPath(const iDynTree::Model & model, const st
     }
 
     return "/ergoCub" + path;
-}
-
-bool YarpLoggerRerun::getRotationAxisAndAngle(const iDynTree::Rotation& rot, iDynTree::Vector3& axis, double& angle)
-{
-    double s, r1, r2, r3;
-    bool ok = rot.getQuaternion(s, r1, r2, r3);
-
-    if (!ok) 
-    {
-        return false;
-    }
-
-    iDynTree::Vector3 imaginary_part;
-    imaginary_part(0) = r1;
-    imaginary_part(1) = r2;
-    imaginary_part(2) = r3;
-
-    double imag_norm_sq = std::pow(r1, 2) + std::pow(r2, 2) + std::pow(r3, 2);
-    double imag_norm = std::sqrt(imag_norm_sq);
-
-    double s_clamped = std::min(1.0, std::max(-1.0, s));
-    angle = 2.0 * std::acos(s_clamped);
-
-    double epsilon = std::numeric_limits<double>::epsilon();
-    if (imag_norm < epsilon) 
-    {
-        axis(0) = 1.0;
-        axis(1) = 0.0;
-        axis(2) = 0.0;
-        angle = 0.0;
-        return true; 
-    } 
-    else 
-    {
-        double inverse_norm = 1.0 / imag_norm;
-        axis(0) = imaginary_part(0) * inverse_norm;
-        axis(1) = imaginary_part(1) * inverse_norm;
-        axis(2) = imaginary_part(2) * inverse_norm;
-    }
-
-    return true;
 }
