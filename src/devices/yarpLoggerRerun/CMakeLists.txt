@@ -27,6 +27,9 @@ if(ENABLE_yarpLoggerRerun)
     target_link_libraries(yarpLoggerRerun PUBLIC  YARP::YARP_os
                                                         YARP::YARP_dev
                                                         YARP::YARP_init
+                                                        iDynTree::idyntree-model
+                                                        iDynTree::idyntree-modelio
+                                                        iDynTree::idyntree-high-level
                                                         rerun_sdk)
 
     yarp_install(TARGETS yarpLoggerRerun

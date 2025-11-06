@@ -9,6 +9,7 @@ project(yarp-device-rerun LANGUAGES CXX)
 
 find_package(YARP 3.12.0 REQUIRED)
 find_package(YCM REQUIRED)
+find_package(iDynTree REQUIRED COMPONENTS idyntree-model idyntree-modelio idyntree-kinematics)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
@@ -25,7 +26,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(YARP_FORCE_DYNAMIC_PLUGINS TRUE CACHE INTERNAL "yarp-device-pylon is always built with dynamic plugins")
+set(YARP_FORCE_DYNAMIC_PLUGINS TRUE CACHE INTERNAL "yarp-device-rerun is always built with dynamic plugins")
 set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Build libraries as shared as opposed to static")
 
 include(AddInstallRPATHSupport)

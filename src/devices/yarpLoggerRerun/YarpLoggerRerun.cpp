@@ -63,7 +63,6 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
     urdfPath = rf.findFileByName(urdfFileName);
 
     configureRerun(recordingStream);
-    
     return true;
 }
 
@@ -151,6 +150,11 @@ void YarpLoggerRerun::run()
             recordingStream.log("positionError/" + m_axesNames[i], rerun::Scalars(jointPosErr[i]));
         }
     }
+    if (kinematicsInitialized)
+    {
+        updateKinematics();
+        return;
+    }
 }
 
 void YarpLoggerRerun::configureRerun(rerun::RecordingStream& recordingStream) 
@@ -169,7 +173,7 @@ void YarpLoggerRerun::configureRerun(rerun::RecordingStream& recordingStream)
 
     if (m_logURDF)
     {
-        recordingStream.log_file_from_path(urdfPath, robotName, true);
+        recordingStream.log_file_from_path(urdfPath, "/", false);
     }
 }
 
@@ -177,6 +181,10 @@ bool YarpLoggerRerun::attachAll(const yarp::dev::PolyDriverList& driverList) {
     std::lock_guard<std::mutex> guard(rerunMutex);
     
     this->attachAllControlBoards(driverList);
+    if (!initKinematics(urdfPath))
+    {
+        yCWarning(YARP_LOGGER_RERUN) << "Kinematics initialization failed; proceeding without link pose animation.";
+    }
     this->start();
 
     return true;
@@ -211,4 +219,208 @@ bool YarpLoggerRerun::detachAll()
         stop();
     }
     return iMultWrap->detachAll();
+}
+
+bool YarpLoggerRerun::initKinematics(const std::string& urdfPath)
+{
+    yCInfo(YARP_LOGGER_RERUN) << "Initializing kinematics from URDF:" << urdfPath;
+    if (urdfPath.empty())
+    {
+        yCError(YARP_LOGGER_RERUN) << "Empty URDF path";
+        return false;
+    }
+    if (!modelLoader.loadModelFromFile(urdfPath))
+    {
+        yCError(YARP_LOGGER_RERUN) << "Failed to load URDF:" << urdfPath;
+        return false;
+    }
+    if (!kinDyn.loadRobotModel(modelLoader.model()))
+    {
+        yCError(YARP_LOGGER_RERUN) << "Failed to load model into KinDynComputations";
+        return false;
+    }
+
+    std::vector<double> initPos;
+    initPos.resize(axes);
+    if (!iEnc->getEncoders(initPos.data()))
+    {
+        yCError(YARP_LOGGER_RERUN) << "Failed to get initial encoder values";
+        return false;
+    }
+
+    for (size_t i = 0; i < m_axesNames.size(); i++)
+    {
+        jointNameToIdx[m_axesNames[i]] = i;
+    }
+
+    iDynTree::Vector3 g; g(0)=0; g(1)=0; g(2)=-9.81;
+    iDynTree::Transform world_T_base = iDynTree::Transform::Identity();
+    iDynTree::VectorDynSize q(modelLoader.model().getNrOfDOFs());
+    q.zero();
+
+    for (size_t i = 0; i < modelLoader.model().getNrOfDOFs(); ++i)
+    {
+        std::string jointName = kinDyn.model().getJointName(i);
+        auto it = jointNameToIdx.find(jointName);
+        if (it != jointNameToIdx.end())
+        {
+            q.setVal(i, iDynTree::deg2rad(-initPos[it->second]));
+            yCInfo(YARP_LOGGER_RERUN) << "Setting initial position for joint" << jointName << "to" << q(i) << "rad";
+        }
+        else
+        {
+            yCDebug(YARP_LOGGER_RERUN) << "Joint" << jointName << "not in control board, leaving at 0";
+        }
+    }
+
+    iDynTree::Twist baseVel = iDynTree::Twist::Zero();
+    iDynTree::VectorDynSize dq(modelLoader.model().getNrOfDOFs());
+    dq.zero();
+
+    if (!kinDyn.setRobotState(world_T_base, q, baseVel, dq, g))
+    {
+        yCWarning(YARP_LOGGER_RERUN) << "Failed to set initial kinematic state";
+        return false;
+    }
+
+    auto& model = kinDyn.model();
+    model.computeFullTreeTraversal(traversal);
+
+    for (size_t l = 0; l < model.getNrOfLinks(); l++)
+    {
+        std::string linkName = model.getLinkName(l);
+        const iDynTree::Link* parentLink = traversal.getParentLinkFromLinkIndex(l);
+        if (parentLink != nullptr)
+        {
+            auto transform = kinDyn.getRelativeTransform(model.getLinkName(parentLink->getIndex()), linkName);
+            auto position = transform.getPosition();
+            auto rotation = transform.getRotation();
+            double qx, qy, qz, qw;
+            rotation.getQuaternion(qw, qx, qy, qz);
+
+            rerun::components::Translation3D translation(
+                static_cast<float>(position(0)) * 0.001f,
+                static_cast<float>(position(1)) * 0.001f,
+                static_cast<float>(position(2)) * 0.001f
+            );
+            rerun::components::RotationQuat rotation_component = rerun::datatypes::Quaternion::from_wxyz(
+                static_cast<float>(qw),
+                static_cast<float>(qx),
+                static_cast<float>(qy),
+                static_cast<float>(qz)
+            );
+
+            std::string path = getLinkPath(model, linkName);
+            recordingStream.log(path + "/" + linkName, rerun::Transform3D().update_fields().with_translation(translation).with_quaternion(rotation_component));
+        }
+    }
+
+    kinematicsInitialized = true;
+    yCInfo(YARP_LOGGER_RERUN) << "Kinematics initialized with" << modelLoader.model().getNrOfDOFs() << "DOFs";
+
+    return true;
+}
+
+void YarpLoggerRerun::updateKinematics()
+{
+    if (!kinematicsInitialized)
+    {
+        return;
+    }
+
+    std::vector<double> currentPos;
+    currentPos.resize(axes);
+    if (!iEnc->getEncoders(currentPos.data()))
+    {
+        yCError(YARP_LOGGER_RERUN) << "Failed to get current encoder values";
+        return;
+    }
+
+    iDynTree::Vector3 g; g(0)=0; g(1)=0; g(2)=-9.81;
+    iDynTree::Transform world_T_base = iDynTree::Transform::Identity();
+    iDynTree::VectorDynSize q(modelLoader.model().getNrOfDOFs());
+    q.zero(); 
+    for (size_t i = 0; i < modelLoader.model().getNrOfDOFs(); ++i)
+    {
+        std::string jointName = kinDyn.model().getJointName(i);
+        auto it = jointNameToIdx.find(jointName);
+        if (it != jointNameToIdx.end())
+        {
+            q.setVal(i, iDynTree::deg2rad(currentPos[it->second]));
+        }
+        else
+        {
+            continue;
+        }
+    }
+
+    iDynTree::Twist baseVel = iDynTree::Twist::Zero();
+    iDynTree::VectorDynSize dq(modelLoader.model().getNrOfDOFs());
+    dq.zero();
+    if (!kinDyn.setRobotState(world_T_base, q, baseVel, dq, g))
+    {
+        yCWarning(YARP_LOGGER_RERUN) << "Failed to set initial kinematic state";
+        return;
+    }
+
+    auto& model = kinDyn.model();
+    model.computeFullTreeTraversal(traversal);
+    double rot_angle;
+    iDynTree::Vector3 rot_axis;
+
+    for (size_t l = 0; l < model.getNrOfLinks(); l++)
+    {
+        std::string linkName = model.getLinkName(l);
+        const iDynTree::Link* parentLink = traversal.getParentLinkFromLinkIndex(l);
+        if (parentLink != nullptr)
+        {
+            auto transform = kinDyn.getRelativeTransform(model.getLinkName(parentLink->getIndex()), linkName);
+            auto position = transform.getPosition();
+            auto rotation = transform.getRotation();
+
+            double qx, qy, qz, qw;
+            rotation.getQuaternion(qw, qx, qy, qz);
+
+            rerun::components::Translation3D translation(
+                static_cast<float>(position(0)) * 0.001f,
+                static_cast<float>(position(1)) * 0.001f,
+                static_cast<float>(position(2)) * 0.001f
+            );
+            rerun::components::RotationQuat rotation_component = rerun::datatypes::Quaternion::from_wxyz(
+                static_cast<float>(qw),
+                static_cast<float>(qx),
+                static_cast<float>(qy),
+                static_cast<float>(qz)
+            );
+
+            std::string path = getLinkPath(model, linkName);
+            recordingStream.log(path + "/" + linkName, rerun::Transform3D().update_fields().with_translation(translation).with_quaternion(rotation_component));        
+        }
+    }
+
+    return;
+}
+
+std::string YarpLoggerRerun::getLinkPath(const iDynTree::Model & model, const std::string & targetLinkName)
+{
+    std::string path{};
+    model.computeFullTreeTraversal(traversal);
+    iDynTree::LinkIndex linkIndex = model.getLinkIndex(targetLinkName);
+    const iDynTree::Link* parentLink = traversal.getParentLinkFromLinkIndex(linkIndex);
+
+    while (parentLink != nullptr)
+    {
+        std::string linkName = model.getLinkName(parentLink->getIndex());
+        const iDynTree::IJoint* parentJoint = traversal.getParentJointFromLinkIndex(linkIndex);
+        if (parentJoint != nullptr)
+        {
+            std::string jointName = model.getJointName(parentJoint->getIndex());
+            path = "/" + jointName + path;
+        }
+        path = "/" + linkName + path;
+        linkIndex = parentLink->getIndex();
+        parentLink = traversal.getParentLinkFromLinkIndex(parentLink->getIndex());
+    }
+
+    return "/ergoCub" + path;
 }
