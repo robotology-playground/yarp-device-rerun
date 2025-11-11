@@ -264,7 +264,7 @@ bool YarpLoggerRerun::initKinematics(const std::string& urdfPath)
         auto it = jointNameToIdx.find(jointName);
         if (it != jointNameToIdx.end())
         {
-            q.setVal(i, iDynTree::deg2rad(-initPos[it->second]));
+            q.setVal(i, iDynTree::deg2rad(initPos[it->second]));
             yCInfo(YARP_LOGGER_RERUN) << "Setting initial position for joint" << jointName << "to" << q(i) << "rad";
         }
         else
@@ -285,6 +285,7 @@ bool YarpLoggerRerun::initKinematics(const std::string& urdfPath)
 
     auto& model = kinDyn.model();
     model.computeFullTreeTraversal(traversal);
+    zeroTransforms.resize(model.getNrOfLinks());
 
     for (size_t l = 0; l < model.getNrOfLinks(); l++)
     {
@@ -292,7 +293,20 @@ bool YarpLoggerRerun::initKinematics(const std::string& urdfPath)
         const iDynTree::Link* parentLink = traversal.getParentLinkFromLinkIndex(l);
         if (parentLink != nullptr)
         {
-            auto transform = kinDyn.getRelativeTransform(model.getLinkName(parentLink->getIndex()), linkName);
+            // Rerun allows to publish on the child node the trasform between the child link frame actual position and the child link frame position if the joint position is set to 0
+            // see https://github.com/rerun-io/rerun/issues/10626#issuecomment-3517446719
+            auto actualTransform = kinDyn.getRelativeTransform(model.getLinkName(parentLink->getIndex()), linkName); //child link actual pose
+            const iDynTree::IJoint* parentJoint = traversal.getParentJointFromLinkIndex(l);
+            if (parentJoint != nullptr)
+            {
+                zeroTransforms[l] = parentJoint->getRestTransform(parentLink->getIndex(), l); //child link pose at zero joint position
+            }
+            else
+            {
+                yCError(YARP_LOGGER_RERUN) << "Parent joint is null for link" << linkName;
+                return false;
+            }
+            auto transform = zeroTransforms[l].inverse() * actualTransform;
             auto position = transform.getPosition();
             auto rotation = transform.getRotation();
             double qx, qy, qz, qw;
@@ -365,8 +379,6 @@ void YarpLoggerRerun::updateKinematics()
 
     auto& model = kinDyn.model();
     model.computeFullTreeTraversal(traversal);
-    double rot_angle;
-    iDynTree::Vector3 rot_axis;
 
     for (size_t l = 0; l < model.getNrOfLinks(); l++)
     {
@@ -374,7 +386,8 @@ void YarpLoggerRerun::updateKinematics()
         const iDynTree::Link* parentLink = traversal.getParentLinkFromLinkIndex(l);
         if (parentLink != nullptr)
         {
-            auto transform = kinDyn.getRelativeTransform(model.getLinkName(parentLink->getIndex()), linkName);
+            auto actualTransform = kinDyn.getRelativeTransform(model.getLinkName(parentLink->getIndex()), linkName); 
+            auto transform = zeroTransforms[l].inverse() * actualTransform;
             auto position = transform.getPosition();
             auto rotation = transform.getRotation();
 
