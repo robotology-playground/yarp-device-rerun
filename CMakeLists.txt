@@ -9,7 +9,7 @@ project(yarp-device-rerun LANGUAGES CXX)
 
 find_package(YARP 3.12.0 REQUIRED)
 find_package(YCM REQUIRED)
-find_package(iDynTree REQUIRED COMPONENTS idyntree-model idyntree-modelio idyntree-kinematics)
+find_package(iDynTree REQUIRED)
 
 # Support either rerun from find_package, or fallback to FetchContent
 # By default, set YARP_DEVICE_RERUN_USE_SYSTEM_RERUN to ON if find_package(rerun_sdk) works
