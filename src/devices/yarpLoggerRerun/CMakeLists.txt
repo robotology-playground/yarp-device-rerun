@@ -4,11 +4,6 @@
 # This software may be modified and distributed under the terms of the
 # BSD-3-Clause license. See the accompanying LICENSE file for details.
 
-include(FetchContent)
-FetchContent_Declare(rerun_sdk URL
-    https://github.com/rerun-io/rerun/releases/download/0.24.1/rerun_cpp_sdk.zip)
-FetchContent_MakeAvailable(rerun_sdk)
-
 yarp_prepare_plugin(yarpLoggerRerun
                     CATEGORY device
                     TYPE YarpLoggerRerun
