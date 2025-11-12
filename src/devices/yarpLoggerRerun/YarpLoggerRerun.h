@@ -71,6 +71,7 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     std::mutex rerunMutex;
     std::string urdfPath, robotName, urdfFileName{"model.urdf"};
     std::unordered_map<std::string, size_t> jointNameToIdx;
+    std::vector<iDynTree::Transform> zeroTransforms;
     
     iDynTree::ModelLoader modelLoader;
     iDynTree::KinDynComputations kinDyn;
