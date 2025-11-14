@@ -1,11 +1,13 @@
-| Group name      | Parameter name     | Type            | Units   | Default Value    | Required | Description                                    | Notes                            |
-|:---------------:|:------------------:|:---------------:|:-------:|:----------------:|:--------:|:----------------------------------------------:|:--------------------------------:|
-|                 | axesNames          | vector<string>  | -       |                  |  Yes     |                                                |
-|                 | logIEncoders       | bool            | -       |     true         |  No      |                                                |
-|                 | logIMotorEncoders  | bool            | -       |     false        |  No      |                                                |
-|                 | logIPidControl     | bool            | -       |     false        |  No      |                                                |
-|                 | logURDF            | bool            | -       |     false        |  No      |                                                |
-|                 | fileName           | string          | -       |     log_test     |  No      |                                                |
-|                 | filePath           | string          | -       |/home/ergocub/test|  No      |                                                |
-|                 | saveToFile         | bool            | -       |     false        |  No      |                                                |
-|                 | viewerIp           | string          | -       |    localhost     |  No      |                                                |
+| Group name      | Parameter name        | Type            | Units   | Default Value    | Required | Description                                    | Notes                            |
+|:---------------:|:---------------------:|:---------------:|:-------:|:----------------:|:--------:|:----------------------------------------------:|:--------------------------------:|
+|                 | axesNames             | vector<string>  | -       |                  |  Yes     |                                                |                                  |
+|                 | logIEncoders          | bool            | -       |     true         |  No      |                                                |                                  |
+|                 | logIMotorEncoders     | bool            | -       |     false        |  No      |                                                |                                  |
+|                 | logIPidControl        | bool            | -       |     false        |  No      |                                                |                                  |
+|                 | logITorqueControl     | bool            | -       |     false        |  No      |                                                |                                  |
+|                 | logIAmplifierControl  | bool            | -       |     false        |  No      |                                                |                                  |
+|                 | logURDF               | bool            | -       |     false        |  No      |                                                |                                  |
+|                 | fileName              | string          | -       |     log_test     |  No      |                                                |                                  |
+|                 | filePath              | string          | -       |/home/ergocub/test|  No      |                                                |                                  |
+|                 | saveToFile            | bool            | -       |     false        |  No      |                                                |                                  |
+|                 | viewerIp              | string          | -       |    localhost     |  No      |                                                |                                  |

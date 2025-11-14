@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Thu Nov  6 09:56:36 2025
+// Generated on: Fri Nov 14 16:20:55 2025
 
 
 #include "YarpLoggerRerun_ParamsParser.h"
@@ -32,6 +32,8 @@ std::vector<std::string> YarpLoggerRerun_ParamsParser::getListOfParams() const
     params.push_back("logIEncoders");
     params.push_back("logIMotorEncoders");
     params.push_back("logIPidControl");
+    params.push_back("logITorqueControl");
+    params.push_back("logIAmplifierControl");
     params.push_back("logURDF");
     params.push_back("fileName");
     params.push_back("filePath");
@@ -62,6 +64,18 @@ bool YarpLoggerRerun_ParamsParser::getParamValue(const std::string& paramName, s
     if (paramName =="logIPidControl")
     {
         if (m_logIPidControl==true) paramValue = "true";
+        else paramValue = "false";
+        return true;
+    }
+    if (paramName =="logITorqueControl")
+    {
+        if (m_logITorqueControl==true) paramValue = "true";
+        else paramValue = "false";
+        return true;
+    }
+    if (paramName =="logIAmplifierControl")
+    {
+        if (m_logIAmplifierControl==true) paramValue = "true";
         else paramValue = "false";
         return true;
     }
@@ -191,6 +205,34 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         prop_check.unput("logIPidControl");
     }
 
+    //Parser of parameter logITorqueControl
+    {
+        if (config.check("logITorqueControl"))
+        {
+            m_logITorqueControl = config.find("logITorqueControl").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logITorqueControl' using value:" << m_logITorqueControl;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logITorqueControl' using DEFAULT value:" << m_logITorqueControl;
+        }
+        prop_check.unput("logITorqueControl");
+    }
+
+    //Parser of parameter logIAmplifierControl
+    {
+        if (config.check("logIAmplifierControl"))
+        {
+            m_logIAmplifierControl = config.find("logIAmplifierControl").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIAmplifierControl' using value:" << m_logIAmplifierControl;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIAmplifierControl' using DEFAULT value:" << m_logIAmplifierControl;
+        }
+        prop_check.unput("logIAmplifierControl");
+    }
+
     //Parser of parameter logURDF
     {
         if (config.check("logURDF"))
@@ -301,6 +343,8 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("'logIEncoders': \n");
     doc = doc + std::string("'logIMotorEncoders': \n");
     doc = doc + std::string("'logIPidControl': \n");
+    doc = doc + std::string("'logITorqueControl': \n");
+    doc = doc + std::string("'logIAmplifierControl': \n");
     doc = doc + std::string("'logURDF': \n");
     doc = doc + std::string("'fileName': \n");
     doc = doc + std::string("'filePath': \n");
@@ -308,7 +352,7 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("'viewerIp': \n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logITorqueControl false --logIAmplifierControl false --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost\n";
     doc = doc + std::string("Using only mandatory params:\n");
     doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
