@@ -6,6 +6,7 @@
 |                 | logIPidControl        | bool            | -       |     false        |  No      |                                                |                                  |
 |                 | logITorqueControl     | bool            | -       |     false        |  No      |                                                |                                  |
 |                 | logIAmplifierControl  | bool            | -       |     false        |  No      |                                                |                                  |
+|                 | logIControlMode       | bool            | -       |     false        |  No      |                                                |                                  |
 |                 | logURDF               | bool            | -       |     false        |  No      |                                                |                                  |
 |                 | fileName              | string          | -       |     log_test     |  No      |                                                |                                  |
 |                 | filePath              | string          | -       |/home/ergocub/test|  No      |                                                |                                  |

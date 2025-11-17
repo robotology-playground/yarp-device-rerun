@@ -20,6 +20,7 @@
 #include <yarp/dev/IPositionControl.h>
 #include <yarp/dev/ITorqueControl.h>
 #include <yarp/dev/IAmplifierControl.h>
+#include <yarp/dev/IControlMode.h>
 #include <yarp/dev/IAxisInfo.h>
 
 #include <iDynTree/Model.h>
@@ -66,8 +67,10 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     yarp::dev::IPositionControl* iPos{nullptr};
     yarp::dev::ITorqueControl* iTorque{nullptr};
     yarp::dev::IAmplifierControl* iAmp{nullptr};
+    yarp::dev::IControlMode* iCtrlMode{nullptr};
     yarp::dev::IAxisInfo* iAxis{nullptr};
     std::vector<double> jointsPos, jointsVel, jointsAcc, motorPos, motorVel, motorAcc, jointPosRef, jointPosErr, jointsTorques, motorCurrents, motorPWM;
+    std::vector<std::string> jointsCtrlModes;
     int axes;
     std::mutex rerunMutex;
     std::string urdfPath, robotName, urdfFileName{"model.urdf"};

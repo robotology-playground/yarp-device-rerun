@@ -42,7 +42,7 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
         return false;
     }
 
-    if (!(driver.view(iEnc) && driver.view(iPos) && driver.view(iMotorEnc) && driver.view(iPid) && driver.view(iAxis) && driver.view(iMultWrap) && driver.view(iTorque) && driver.view(iAmp)))
+    if (!(driver.view(iEnc) && driver.view(iPos) && driver.view(iMotorEnc) && driver.view(iPid) && driver.view(iAxis) && driver.view(iMultWrap) && driver.view(iTorque) && driver.view(iAmp) && driver.view(iCtrlMode)))
     {
         yCError(YARP_LOGGER_RERUN) << "Failed to open interfaces";
         driver.close();
@@ -61,6 +61,7 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
     jointsTorques.resize(axes);
     motorCurrents.resize(axes);
     motorPWM.resize(axes);
+    jointsCtrlModes.resize(axes);
 
     yarp::os::ResourceFinder & rf = yarp::os::ResourceFinder::getResourceFinderSingleton();
     urdfPath = rf.findFileByName(urdfFileName);
@@ -190,6 +191,20 @@ void YarpLoggerRerun::run()
         {
             recordingStream.try_log("motorCurrents/" + m_axesNames[i], rerun::Scalars(motorCurrents[i]));
             recordingStream.try_log("motorPWM/" + m_axesNames[i], rerun::Scalars(motorPWM[i]));
+        }
+    }
+    if(m_logIControlMode)
+    {
+        for (size_t i = 0; i < m_axesNames.size(); ++i) 
+        {
+            int mode;
+            if (!iCtrlMode->getControlMode(i, &mode))
+            {
+                yCErrorOnce(YARP_LOGGER_RERUN) << "Failed to get control mode for joint" << m_axesNames[i];
+                return;
+            }
+            jointsCtrlModes[i] = yarp::os::Vocab32::decode(mode);
+            recordingStream.try_log_static("controlModes/" + m_axesNames[i], rerun::TextLog(rerun::components::Text(jointsCtrlModes[i])).with_level( rerun::TextLogLevel::Info));
         }
     }
     if (kinematicsInitialized)
