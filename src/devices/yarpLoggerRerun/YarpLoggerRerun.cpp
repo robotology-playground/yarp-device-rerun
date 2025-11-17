@@ -7,6 +7,7 @@
  */
 
 #include <yarp/os/ResourceFinder.h>
+#include <yarp/os/Vocab.h>
 #include <rerun/log_sink.hpp>
 
 #include "YarpLoggerRerun.h"
@@ -88,24 +89,23 @@ void YarpLoggerRerun::run()
 {
     if (m_logIMotorEncoders)
     {
-        if (!iMotorEnc->getMotorEncoders(motorPos.data()))
-        {
-            yCError(YARP_LOGGER_RERUN) << "Failed to get motor encoders!";
-            return;
-        }
-        if (!iMotorEnc->getMotorEncoderSpeeds(motorVel.data()))
-        {
-            yCError(YARP_LOGGER_RERUN) << "Failed to get motor velocities!";
-            return;
-        }
-        if (!iMotorEnc->getMotorEncoderAccelerations(motorAcc.data()))
-        {
-            yCError(YARP_LOGGER_RERUN) << "Failed to get motor accelerations!";
-            return;
-        }
-
         for (size_t i = 0; i < m_axesNames.size(); ++i) 
         {
+            if (!iMotorEnc->getMotorEncoder(i, &motorPos[i]))
+            {
+                 yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get motor positions for joint" << m_axesNames[i] << ", setting to 0.0";
+                motorPos[i] = 0.0;
+            }
+            if (!iMotorEnc->getMotorEncoderSpeed(i, &motorVel[i]))
+            {
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get motor velocities for joint" << m_axesNames[i] << ", setting to 0.0";
+                motorVel[i] = 0.0;
+            }
+            if (!iMotorEnc->getMotorEncoderAcceleration(i, &motorAcc[i]))
+            {
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get motor accelerations for joint" << m_axesNames[i] << ", setting to 0.0";
+                motorAcc[i] = 0.0;
+            }
             recordingStream.try_log("motorEncoders/" + m_axesNames[i], rerun::Scalars(motorPos[i]));
             recordingStream.try_log("motorVelocities/" + m_axesNames[i], rerun::Scalars(motorVel[i]));
             recordingStream.try_log("motorAccelerations/" + m_axesNames[i], rerun::Scalars(motorAcc[i]));
@@ -113,29 +113,25 @@ void YarpLoggerRerun::run()
     }
     if (m_logIEncoders)
     {
-        if (!iEnc->getEncoders(jointsPos.data()))
-        {
-            yCError(YARP_LOGGER_RERUN) << "Failed to get encoders!";
-            return;
-        }
-        if (!iEnc->getEncoderSpeeds(jointsVel.data()))
-        {
-            yCError(YARP_LOGGER_RERUN) << "Failed to get joints velocities!";
-            return;
-        }
         for (size_t i = 0; i < axes; ++i)
         {
+            if (!iEnc->getEncoder(i, &jointsPos[i]))
+            {
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get joints positions for joint" << m_axesNames[i] << ", setting to 0.0";
+                jointsPos[i] = 0.0;
+            }
+            if (!iEnc->getEncoderSpeed(i, &jointsVel[i]))
+            {
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get joints velocities for joint" << m_axesNames[i] << ", setting to 0.0";
+                jointsVel[i] = 0.0;
+            }
             if(!iEnc->getEncoderAcceleration(i, &jointsAcc[i]))
             {
                 // Not implemented for the fingers coupling, see:
                 // https://github.com/icub-tech-iit/ergocub-software/blob/13218d0168d43af01e0b794c87198bcb48bf4105/src/modules/couplingXCubHandMk5/CouplingXCubHandMk5.cpp#L196-L198
-                yCErrorOnce(YARP_LOGGER_RERUN) << "Failed to get joints accelerations for joint" << m_axesNames[i];
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get joints accelerations for joint" << m_axesNames[i] << ", setting to 0.0";
                 jointsAcc[i] = 0.0;
             }
-        }
-        
-        for (size_t i = 0; i < axes; ++i) 
-        {
             recordingStream.try_log("encoders/" + m_axesNames[i], rerun::Scalars(jointsPos[i]));
             recordingStream.try_log("velocities/" + m_axesNames[i], rerun::Scalars(jointsVel[i]));
             recordingStream.try_log("accelerations/" + m_axesNames[i], rerun::Scalars(jointsAcc[i]));
@@ -148,11 +144,13 @@ void YarpLoggerRerun::run()
         {
             if (!iPid->getPidReference(yarp::dev::VOCAB_PIDTYPE_POSITION, i, &jointPosRef[i]))
             {
-                yCErrorOnce(YARP_LOGGER_RERUN) << "Failed to get joints position references for joint" << m_axesNames[i];
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get joints position references for joint" << m_axesNames[i] << ", setting to 0.0";
+                jointPosRef[i] = 0.0;
             }
             if (!iPid->getPidError(yarp::dev::VOCAB_PIDTYPE_POSITION, i, &jointPosErr[i]))
             {
-                yCErrorOnce(YARP_LOGGER_RERUN) << "Failed to get joints position errors for joint" << m_axesNames[i];
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get joints position errors for joint" << m_axesNames[i] << ", setting to 0.0";
+                jointPosErr[i] = 0.0;
             }
             recordingStream.try_log("encoders/ref/" + m_axesNames[i], rerun::Scalars(jointPosRef[i]));
             recordingStream.try_log("positionError/" + m_axesNames[i], rerun::Scalars(jointPosErr[i]));
@@ -166,7 +164,8 @@ void YarpLoggerRerun::run()
             {
                 // Not implemented for the fingers coupling, see:
                 // https://github.com/icub-tech-iit/ergocub-software/blob/13218d0168d43af01e0b794c87198bcb48bf4105/src/modules/couplingXCubHandMk5/CouplingXCubHandMk5.cpp#L201-L204
-                yCErrorOnce(YARP_LOGGER_RERUN) << "Failed to get joints torques for joint" << m_axesNames[i];
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get joints torques for joint" << m_axesNames[i] << ", setting to 0.0";
+                jointsTorques[i] = 0.0;
             }
             recordingStream.try_log("torques/" + m_axesNames[i], rerun::Scalars(jointsTorques[i]));
         }
@@ -174,21 +173,19 @@ void YarpLoggerRerun::run()
     if (m_logIAmplifierControl)
     {
         // Those methods are not implemented in gz-sim-yarp-plugins, logIAmplifierControl should be used only with real robots
-        if (!iAmp->getCurrents(motorCurrents.data()))
-        {
-            yCError(YARP_LOGGER_RERUN) << "Failed to get motor currents!";
-            return;
-        }
+
         for (size_t i = 0; i < motorPWM.size(); ++i) 
         {
+            if (!iAmp->getCurrent(i, &motorCurrents[i]))
+            {
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get motor currents for motor" << m_axesNames[i] << ", setting to 0.0";
+                motorCurrents[i] = 0.0;
+            }
             if (!iAmp->getPWM(i, &motorPWM[i]))
             {
-                yCError(YARP_LOGGER_RERUN) << "Failed to get motor PWMs!";
-                return;
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get motor PWMs for motor" << m_axesNames[i] << ", setting to 0.0";
+                motorPWM[i] = 0.0;
             }
-        }
-        for (size_t i = 0; i < m_axesNames.size(); ++i) 
-        {
             recordingStream.try_log("motorCurrents/" + m_axesNames[i], rerun::Scalars(motorCurrents[i]));
             recordingStream.try_log("motorPWM/" + m_axesNames[i], rerun::Scalars(motorPWM[i]));
         }
@@ -200,8 +197,8 @@ void YarpLoggerRerun::run()
             int mode;
             if (!iCtrlMode->getControlMode(i, &mode))
             {
-                yCErrorOnce(YARP_LOGGER_RERUN) << "Failed to get control mode for joint" << m_axesNames[i];
-                return;
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get control mode for joint" << m_axesNames[i] << ", setting to UNKNOWN";
+                jointsCtrlModes[i] = VOCAB_CM_UNKNOWN;
             }
             jointsCtrlModes[i] = yarp::os::Vocab32::decode(mode);
             recordingStream.try_log_static("controlModes/" + m_axesNames[i], rerun::TextLog(rerun::components::Text(jointsCtrlModes[i])).with_level( rerun::TextLogLevel::Info));
