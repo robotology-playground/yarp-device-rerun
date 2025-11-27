@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Thu Nov 27 11:16:47 2025
+// Generated on: Thu Nov 27 14:40:29 2025
 
 
 #include "YarpLoggerRerun_ParamsParser.h"
@@ -40,6 +40,7 @@ std::vector<std::string> YarpLoggerRerun_ParamsParser::getListOfParams() const
     params.push_back("logILocalization2D");
     params.push_back("localizationRemoteName");
     params.push_back("logIRawValuesPublisher");
+    params.push_back("rawValuesPublisherRemoteName");
     params.push_back("logURDF");
     params.push_back("fileName");
     params.push_back("filePath");
@@ -118,6 +119,11 @@ bool YarpLoggerRerun_ParamsParser::getParamValue(const std::string& paramName, s
     {
         if (m_logIRawValuesPublisher==true) paramValue = "true";
         else paramValue = "false";
+        return true;
+    }
+    if (paramName =="rawValuesPublisherRemoteName")
+    {
+        paramValue = m_rawValuesPublisherRemoteName;
         return true;
     }
     if (paramName =="logURDF")
@@ -358,6 +364,20 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         prop_check.unput("logIRawValuesPublisher");
     }
 
+    //Parser of parameter rawValuesPublisherRemoteName
+    {
+        if (config.check("rawValuesPublisherRemoteName"))
+        {
+            m_rawValuesPublisherRemoteName = config.find("rawValuesPublisherRemoteName").asString();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'rawValuesPublisherRemoteName' using value:" << m_rawValuesPublisherRemoteName;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'rawValuesPublisherRemoteName' using DEFAULT value:" << m_rawValuesPublisherRemoteName;
+        }
+        prop_check.unput("rawValuesPublisherRemoteName");
+    }
+
     //Parser of parameter logURDF
     {
         if (config.check("logURDF"))
@@ -476,6 +496,7 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("'logILocalization2D': \n");
     doc = doc + std::string("'localizationRemoteName': Must have the name of the remote port defined in the related nws\n");
     doc = doc + std::string("'logIRawValuesPublisher': \n");
+    doc = doc + std::string("'rawValuesPublisherRemoteName': Must have the name of the remote port defined in the related nws\n");
     doc = doc + std::string("'logURDF': \n");
     doc = doc + std::string("'fileName': \n");
     doc = doc + std::string("'filePath': \n");
@@ -483,7 +504,7 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("'viewerIp': \n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logITorqueControl false --logIAmplifierControl false --logIControlMode false --logIInteractionMode false --logIMotorTemperatures false --logILocalization2D false --localizationRemoteName /localizationRemote --logIRawValuesPublisher false --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logITorqueControl false --logIAmplifierControl false --logIControlMode false --logIInteractionMode false --logIMotorTemperatures false --logILocalization2D false --localizationRemoteName /localizationRemote --logIRawValuesPublisher false --rawValuesPublisherRemoteName /rawValuesRemote --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost\n";
     doc = doc + std::string("Using only mandatory params:\n");
     doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;

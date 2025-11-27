@@ -43,7 +43,7 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
         yCError(YARP_LOGGER_RERUN) << "Failed to open controlBoard driver";
         return false;
     }
-    if (conf.check("logILocalization2D"))
+    if (conf.check("logILocalization2D") && m_logILocalization2D)
     {
         yarp::os::Property loc2DClientProp;
         loc2DClientProp.put("device", "localization2D_nwc_yarp");
@@ -60,8 +60,25 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
             return false;
         }
     }
+    if (conf.check("logIRawValuesPublisher") && m_logIRawValuesPublisher)
+    {
+        yarp::os::Property rawValPubClientProp;
+        rawValPubClientProp.put("device", "rawValuesPublisherClient");
+        rawValPubClientProp.put("remote", m_rawValuesPublisherRemoteName);
+        rawValPubClientProp.put("local",  "/yarpLoggerRerun" + m_rawValuesPublisherRemoteName + "/client");
+        if (!rawValuesPublisherClient.open(rawValPubClientProp))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Failed to open the rawValuesPublisherClient driver.";
+            return false;
+        }
+        if (!rawValuesPublisherClient.view(iRawValPub))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Failed to open IRawValuesPublisher interface.";
+            return false;
+        }
+    }
 
-    if (!(driver.view(iEnc) && driver.view(iPos) && driver.view(iMotorEnc) && driver.view(iPid) && driver.view(iAxis) && driver.view(iMultWrap) && driver.view(iTorque) && driver.view(iAmp) && driver.view(iCtrlMode) && driver.view(iIntMode) && driver.view(iMotor) && driver.view(iLoc)))
+    if (!(driver.view(iEnc) && driver.view(iPos) && driver.view(iMotorEnc) && driver.view(iPid) && driver.view(iAxis) && driver.view(iMultWrap) && driver.view(iTorque) && driver.view(iAmp) && driver.view(iCtrlMode) && driver.view(iIntMode) && driver.view(iMotor)))
     {
         yCError(YARP_LOGGER_RERUN) << "Failed to open interfaces";
         driver.close();
@@ -84,6 +101,7 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
     jointsInteractionModes.resize(axes);
     motorTemperatures.resize(axes);
     odometryData.resize(9); // x, y, theta, base_vel_x, base_vel_y, base_vel_theta, odom_vel_x, odom_vel_y, odom_vel_theta
+    rawDataValuesMap.clear();
 
     yarp::os::ResourceFinder & rf = yarp::os::ResourceFinder::getResourceFinderSingleton();
     urdfPath = rf.findFileByName(urdfFileName);
@@ -107,6 +125,10 @@ bool YarpLoggerRerun::close()
     {
         localization2DClient.close();
     }
+    if (m_logIRawValuesPublisher && rawValuesPublisherClient.isValid())
+    {
+        rawValuesPublisherClient.close();
+    }
     return true;
 }
 
@@ -118,7 +140,7 @@ void YarpLoggerRerun::run()
         {
             if (!iMotorEnc->getMotorEncoder(i, &motorPos[i]))
             {
-                 yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get motor positions for joint" << m_axesNames[i] << ", setting to 0.0";
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get motor positions for joint" << m_axesNames[i] << ", setting to 0.0";
                 motorPos[i] = 0.0;
             }
             if (!iMotorEnc->getMotorEncoderSpeed(i, &motorVel[i]))
@@ -269,6 +291,19 @@ void YarpLoggerRerun::run()
         recordingStream.try_log("odom/base_velocity", rerun::Arrows3D::from_vectors(rerun::datatypes::Vec3D(static_cast<float>(odomData.base_vel_x), static_cast<float>(odomData.base_vel_y), 0.0f)).with_origins(rerun::datatypes::Vec3D(static_cast<float>(odomData.odom_x), static_cast<float>(odomData.odom_y), 0.0f)));
         recordingStream.try_log("odom/odom_velocity", rerun::Arrows3D::from_vectors(rerun::datatypes::Vec3D(static_cast<float>(odomData.odom_vel_x), static_cast<float>(odomData.odom_vel_y), 0.0f)).with_origins(rerun::datatypes::Vec3D(static_cast<float>(odomData.odom_x), static_cast<float>(odomData.odom_y), 0.0f)));
     }
+    if (m_logIRawValuesPublisher)
+    {
+        if (!iRawValPub->getRawDataMap(rawDataValuesMap))
+        {
+            yCWarning(YARP_LOGGER_RERUN) << "Raw data was not read correctly";
+        }
+
+        for (auto [key,value] : rawDataValuesMap)
+        {
+            recordingStream.try_log("rawValues/" + key, rerun::Scalars(value));
+        }
+    }
+
     if (kinematicsInitialized)
     {
         updateKinematics();
@@ -443,7 +478,7 @@ bool YarpLoggerRerun::initKinematics(const std::string& urdfPath)
             );
 
             std::string path = getLinkPath(model, linkName);
-            recordingStream.try_log(path + "/" + linkName, rerun::Transform3D().update_fields().with_translation(translation).with_quaternion(rotation_component));
+            recordingStream.try_log(path + "/" + linkName, rerun::Transform3D().with_translation(translation).with_quaternion(rotation_component));
         }
     }
 
@@ -525,7 +560,7 @@ void YarpLoggerRerun::updateKinematics()
             );
 
             std::string path = getLinkPath(model, linkName);
-            recordingStream.try_log(path + "/" + linkName, rerun::Transform3D().update_fields().with_translation(translation).with_quaternion(rotation_component));        
+            recordingStream.try_log(path + "/" + linkName, rerun::Transform3D().with_translation(translation).with_quaternion(rotation_component));        
         }
     }
 
