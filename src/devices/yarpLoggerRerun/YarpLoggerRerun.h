@@ -24,6 +24,7 @@
 #include <yarp/dev/IControlMode.h>
 #include <yarp/dev/IAxisInfo.h>
 #include <yarp/dev/IInteractionMode.h>
+#include <yarp/dev/ILocalization2D.h>
 
 #include <iDynTree/Model.h>
 #include <iDynTree/ModelLoader.h>
@@ -61,7 +62,7 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     std::string getLinkPath(const iDynTree::Model& model, const std::string& targetLink);
 
     rerun::RecordingStream recordingStream{"logger_app_id_" + std::to_string(yarp::os::Time::now()), "logger_recording_id"};
-    yarp::dev::PolyDriver driver;
+    yarp::dev::PolyDriver driver, localization2DClient;
     yarp::dev::IEncoders* iEnc{nullptr};
     yarp::dev::IMotorEncoders* iMotorEnc{nullptr};
     yarp::dev::IMotor* iMotor{nullptr};
@@ -73,7 +74,8 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     yarp::dev::IControlMode* iCtrlMode{nullptr};
     yarp::dev::IAxisInfo* iAxis{nullptr};
     yarp::dev::IInteractionMode* iIntMode{nullptr};
-    std::vector<double> jointsPos, jointsVel, jointsAcc, motorPos, motorVel, motorAcc, jointPosRef, jointPosErr, jointsTorques, motorCurrents, motorPWM, motorTemperatures;
+    yarp::dev::Nav2D::ILocalization2D* iLoc{nullptr};
+    std::vector<double> jointsPos, jointsVel, jointsAcc, motorPos, motorVel, motorAcc, jointPosRef, jointPosErr, jointsTorques, motorCurrents, motorPWM, motorTemperatures, odometryData;
     std::vector<std::string> jointsCtrlModes, jointsInteractionModes;
     int axes;
     std::mutex rerunMutex;

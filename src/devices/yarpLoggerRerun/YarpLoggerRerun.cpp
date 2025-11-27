@@ -35,6 +35,7 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
 
     yarp::os::Property conf;
     conf.fromString(config.toString().c_str());
+
     conf.put("device", "controlboardremapper");
 
     if (!driver.open(conf))
@@ -42,8 +43,25 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
         yCError(YARP_LOGGER_RERUN) << "Failed to open controlBoard driver";
         return false;
     }
+    if (conf.check("logILocalization2D"))
+    {
+        yarp::os::Property loc2DClientProp;
+        loc2DClientProp.put("device", "localization2D_nwc_yarp");
+        loc2DClientProp.put("remote", m_localizationRemoteName);
+        loc2DClientProp.put("local",  "/yarpLoggerRerun" + m_localizationRemoteName + "/client");
+        if (!localization2DClient.open(loc2DClientProp))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Failed to open the localization2DClient driver.";
+            return false;
+        }
+        if (!localization2DClient.view(iLoc))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Failed to open ILocalization2D interface.";
+            return false;
+        }
+    }
 
-    if (!(driver.view(iEnc) && driver.view(iPos) && driver.view(iMotorEnc) && driver.view(iPid) && driver.view(iAxis) && driver.view(iMultWrap) && driver.view(iTorque) && driver.view(iAmp) && driver.view(iCtrlMode) && driver.view(iIntMode) && driver.view(iMotor)))
+    if (!(driver.view(iEnc) && driver.view(iPos) && driver.view(iMotorEnc) && driver.view(iPid) && driver.view(iAxis) && driver.view(iMultWrap) && driver.view(iTorque) && driver.view(iAmp) && driver.view(iCtrlMode) && driver.view(iIntMode) && driver.view(iMotor) && driver.view(iLoc)))
     {
         yCError(YARP_LOGGER_RERUN) << "Failed to open interfaces";
         driver.close();
@@ -65,6 +83,7 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
     jointsCtrlModes.resize(axes);
     jointsInteractionModes.resize(axes);
     motorTemperatures.resize(axes);
+    odometryData.resize(9); // x, y, theta, base_vel_x, base_vel_y, base_vel_theta, odom_vel_x, odom_vel_y, odom_vel_theta
 
     yarp::os::ResourceFinder & rf = yarp::os::ResourceFinder::getResourceFinderSingleton();
     urdfPath = rf.findFileByName(urdfFileName);
@@ -83,6 +102,10 @@ bool YarpLoggerRerun::close()
     if (driver.isValid())
     {
         driver.close();
+    }
+    if (m_logILocalization2D && localization2DClient.isValid())
+    {
+        localization2DClient.close();
     }
     return true;
 }
@@ -233,6 +256,18 @@ void YarpLoggerRerun::run()
             }
             recordingStream.try_log("motorTemperatures/" + m_axesNames[i], rerun::Scalars(motorTemperatures[i]));
         }
+    }
+    if (m_logILocalization2D)
+    {
+        yarp::dev::OdometryData odomData;
+        if (!iLoc->getEstimatedOdometry(odomData))
+        {
+            yCWarning(YARP_LOGGER_RERUN) << "Odometry data was not read correctly";
+        }
+
+        recordingStream.try_log("odom/pose", rerun::Transform3D(rerun::components::Translation3D(static_cast<float>(odomData.odom_x), static_cast<float>(odomData.odom_y), 0.0f), rerun::components::RotationAxisAngle(rerun::datatypes::RotationAxisAngle(rerun::datatypes::Vec3D(0.0f, 0.0f, 1.0f), rerun::datatypes::Angle::degrees(static_cast<float>(odomData.odom_theta))))));
+        recordingStream.try_log("odom/base_velocity", rerun::Arrows3D::from_vectors(rerun::datatypes::Vec3D(static_cast<float>(odomData.base_vel_x), static_cast<float>(odomData.base_vel_y), 0.0f)).with_origins(rerun::datatypes::Vec3D(static_cast<float>(odomData.odom_x), static_cast<float>(odomData.odom_y), 0.0f)));
+        recordingStream.try_log("odom/odom_velocity", rerun::Arrows3D::from_vectors(rerun::datatypes::Vec3D(static_cast<float>(odomData.odom_vel_x), static_cast<float>(odomData.odom_vel_y), 0.0f)).with_origins(rerun::datatypes::Vec3D(static_cast<float>(odomData.odom_x), static_cast<float>(odomData.odom_y), 0.0f)));
     }
     if (kinematicsInitialized)
     {

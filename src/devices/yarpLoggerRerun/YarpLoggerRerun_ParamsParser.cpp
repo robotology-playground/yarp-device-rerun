@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Thu Nov 27 10:05:20 2025
+// Generated on: Thu Nov 27 11:16:47 2025
 
 
 #include "YarpLoggerRerun_ParamsParser.h"
@@ -37,6 +37,9 @@ std::vector<std::string> YarpLoggerRerun_ParamsParser::getListOfParams() const
     params.push_back("logIControlMode");
     params.push_back("logIInteractionMode");
     params.push_back("logIMotorTemperatures");
+    params.push_back("logILocalization2D");
+    params.push_back("localizationRemoteName");
+    params.push_back("logIRawValuesPublisher");
     params.push_back("logURDF");
     params.push_back("fileName");
     params.push_back("filePath");
@@ -97,6 +100,23 @@ bool YarpLoggerRerun_ParamsParser::getParamValue(const std::string& paramName, s
     if (paramName =="logIMotorTemperatures")
     {
         if (m_logIMotorTemperatures==true) paramValue = "true";
+        else paramValue = "false";
+        return true;
+    }
+    if (paramName =="logILocalization2D")
+    {
+        if (m_logILocalization2D==true) paramValue = "true";
+        else paramValue = "false";
+        return true;
+    }
+    if (paramName =="localizationRemoteName")
+    {
+        paramValue = m_localizationRemoteName;
+        return true;
+    }
+    if (paramName =="logIRawValuesPublisher")
+    {
+        if (m_logIRawValuesPublisher==true) paramValue = "true";
         else paramValue = "false";
         return true;
     }
@@ -296,6 +316,48 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         prop_check.unput("logIMotorTemperatures");
     }
 
+    //Parser of parameter logILocalization2D
+    {
+        if (config.check("logILocalization2D"))
+        {
+            m_logILocalization2D = config.find("logILocalization2D").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logILocalization2D' using value:" << m_logILocalization2D;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logILocalization2D' using DEFAULT value:" << m_logILocalization2D;
+        }
+        prop_check.unput("logILocalization2D");
+    }
+
+    //Parser of parameter localizationRemoteName
+    {
+        if (config.check("localizationRemoteName"))
+        {
+            m_localizationRemoteName = config.find("localizationRemoteName").asString();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'localizationRemoteName' using value:" << m_localizationRemoteName;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'localizationRemoteName' using DEFAULT value:" << m_localizationRemoteName;
+        }
+        prop_check.unput("localizationRemoteName");
+    }
+
+    //Parser of parameter logIRawValuesPublisher
+    {
+        if (config.check("logIRawValuesPublisher"))
+        {
+            m_logIRawValuesPublisher = config.find("logIRawValuesPublisher").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIRawValuesPublisher' using value:" << m_logIRawValuesPublisher;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIRawValuesPublisher' using DEFAULT value:" << m_logIRawValuesPublisher;
+        }
+        prop_check.unput("logIRawValuesPublisher");
+    }
+
     //Parser of parameter logURDF
     {
         if (config.check("logURDF"))
@@ -411,6 +473,9 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("'logIControlMode': \n");
     doc = doc + std::string("'logIInteractionMode': \n");
     doc = doc + std::string("'logIMotorTemperatures': \n");
+    doc = doc + std::string("'logILocalization2D': \n");
+    doc = doc + std::string("'localizationRemoteName': Must have the name of the remote port defined in the related nws\n");
+    doc = doc + std::string("'logIRawValuesPublisher': \n");
     doc = doc + std::string("'logURDF': \n");
     doc = doc + std::string("'fileName': \n");
     doc = doc + std::string("'filePath': \n");
@@ -418,7 +483,7 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("'viewerIp': \n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logITorqueControl false --logIAmplifierControl false --logIControlMode false --logIInteractionMode false --logIMotorTemperatures false --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logITorqueControl false --logIAmplifierControl false --logIControlMode false --logIInteractionMode false --logIMotorTemperatures false --logILocalization2D false --localizationRemoteName /localizationRemote --logIRawValuesPublisher false --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost\n";
     doc = doc + std::string("Using only mandatory params:\n");
     doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
