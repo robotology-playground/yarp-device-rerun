@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Mon Nov 17 15:51:42 2025
+// Generated on: Thu Nov 27 10:05:20 2025
 
 
 #include "YarpLoggerRerun_ParamsParser.h"
@@ -35,6 +35,8 @@ std::vector<std::string> YarpLoggerRerun_ParamsParser::getListOfParams() const
     params.push_back("logITorqueControl");
     params.push_back("logIAmplifierControl");
     params.push_back("logIControlMode");
+    params.push_back("logIInteractionMode");
+    params.push_back("logIMotorTemperatures");
     params.push_back("logURDF");
     params.push_back("fileName");
     params.push_back("filePath");
@@ -83,6 +85,18 @@ bool YarpLoggerRerun_ParamsParser::getParamValue(const std::string& paramName, s
     if (paramName =="logIControlMode")
     {
         if (m_logIControlMode==true) paramValue = "true";
+        else paramValue = "false";
+        return true;
+    }
+    if (paramName =="logIInteractionMode")
+    {
+        if (m_logIInteractionMode==true) paramValue = "true";
+        else paramValue = "false";
+        return true;
+    }
+    if (paramName =="logIMotorTemperatures")
+    {
+        if (m_logIMotorTemperatures==true) paramValue = "true";
         else paramValue = "false";
         return true;
     }
@@ -254,6 +268,34 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
         prop_check.unput("logIControlMode");
     }
 
+    //Parser of parameter logIInteractionMode
+    {
+        if (config.check("logIInteractionMode"))
+        {
+            m_logIInteractionMode = config.find("logIInteractionMode").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIInteractionMode' using value:" << m_logIInteractionMode;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIInteractionMode' using DEFAULT value:" << m_logIInteractionMode;
+        }
+        prop_check.unput("logIInteractionMode");
+    }
+
+    //Parser of parameter logIMotorTemperatures
+    {
+        if (config.check("logIMotorTemperatures"))
+        {
+            m_logIMotorTemperatures = config.find("logIMotorTemperatures").asBool();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIMotorTemperatures' using value:" << m_logIMotorTemperatures;
+        }
+        else
+        {
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'logIMotorTemperatures' using DEFAULT value:" << m_logIMotorTemperatures;
+        }
+        prop_check.unput("logIMotorTemperatures");
+    }
+
     //Parser of parameter logURDF
     {
         if (config.check("logURDF"))
@@ -367,6 +409,8 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("'logITorqueControl': \n");
     doc = doc + std::string("'logIAmplifierControl': \n");
     doc = doc + std::string("'logIControlMode': \n");
+    doc = doc + std::string("'logIInteractionMode': \n");
+    doc = doc + std::string("'logIMotorTemperatures': \n");
     doc = doc + std::string("'logURDF': \n");
     doc = doc + std::string("'fileName': \n");
     doc = doc + std::string("'filePath': \n");
@@ -374,7 +418,7 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("'viewerIp': \n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logITorqueControl false --logIAmplifierControl false --logIControlMode false --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logITorqueControl false --logIAmplifierControl false --logIControlMode false --logIInteractionMode false --logIMotorTemperatures false --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost\n";
     doc = doc + std::string("Using only mandatory params:\n");
     doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;

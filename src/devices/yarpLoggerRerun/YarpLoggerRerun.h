@@ -13,6 +13,7 @@
 #include <yarp/os/LogStream.h>
 #include <yarp/dev/IEncoders.h>
 #include <yarp/dev/IMotorEncoders.h>
+#include <yarp/dev/IMotor.h>
 #include <yarp/dev/IPidControl.h>
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/os/PeriodicThread.h>
@@ -22,6 +23,7 @@
 #include <yarp/dev/IAmplifierControl.h>
 #include <yarp/dev/IControlMode.h>
 #include <yarp/dev/IAxisInfo.h>
+#include <yarp/dev/IInteractionMode.h>
 
 #include <iDynTree/Model.h>
 #include <iDynTree/ModelLoader.h>
@@ -62,6 +64,7 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     yarp::dev::PolyDriver driver;
     yarp::dev::IEncoders* iEnc{nullptr};
     yarp::dev::IMotorEncoders* iMotorEnc{nullptr};
+    yarp::dev::IMotor* iMotor{nullptr};
     yarp::dev::IPidControl* iPid{nullptr};
     yarp::dev::IMultipleWrapper* iMultWrap{nullptr};
     yarp::dev::IPositionControl* iPos{nullptr};
@@ -69,8 +72,9 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     yarp::dev::IAmplifierControl* iAmp{nullptr};
     yarp::dev::IControlMode* iCtrlMode{nullptr};
     yarp::dev::IAxisInfo* iAxis{nullptr};
-    std::vector<double> jointsPos, jointsVel, jointsAcc, motorPos, motorVel, motorAcc, jointPosRef, jointPosErr, jointsTorques, motorCurrents, motorPWM;
-    std::vector<std::string> jointsCtrlModes;
+    yarp::dev::IInteractionMode* iIntMode{nullptr};
+    std::vector<double> jointsPos, jointsVel, jointsAcc, motorPos, motorVel, motorAcc, jointPosRef, jointPosErr, jointsTorques, motorCurrents, motorPWM, motorTemperatures;
+    std::vector<std::string> jointsCtrlModes, jointsInteractionModes;
     int axes;
     std::mutex rerunMutex;
     std::string urdfPath, robotName, urdfFileName{"model.urdf"};

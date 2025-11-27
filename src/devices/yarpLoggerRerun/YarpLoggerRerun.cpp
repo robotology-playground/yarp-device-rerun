@@ -43,7 +43,7 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
         return false;
     }
 
-    if (!(driver.view(iEnc) && driver.view(iPos) && driver.view(iMotorEnc) && driver.view(iPid) && driver.view(iAxis) && driver.view(iMultWrap) && driver.view(iTorque) && driver.view(iAmp) && driver.view(iCtrlMode)))
+    if (!(driver.view(iEnc) && driver.view(iPos) && driver.view(iMotorEnc) && driver.view(iPid) && driver.view(iAxis) && driver.view(iMultWrap) && driver.view(iTorque) && driver.view(iAmp) && driver.view(iCtrlMode) && driver.view(iIntMode) && driver.view(iMotor)))
     {
         yCError(YARP_LOGGER_RERUN) << "Failed to open interfaces";
         driver.close();
@@ -63,6 +63,8 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
     motorCurrents.resize(axes);
     motorPWM.resize(axes);
     jointsCtrlModes.resize(axes);
+    jointsInteractionModes.resize(axes);
+    motorTemperatures.resize(axes);
 
     yarp::os::ResourceFinder & rf = yarp::os::ResourceFinder::getResourceFinderSingleton();
     urdfPath = rf.findFileByName(urdfFileName);
@@ -190,7 +192,7 @@ void YarpLoggerRerun::run()
             recordingStream.try_log("motorPWM/" + m_axesNames[i], rerun::Scalars(motorPWM[i]));
         }
     }
-    if(m_logIControlMode)
+    if (m_logIControlMode)
     {
         for (size_t i = 0; i < m_axesNames.size(); ++i) 
         {
@@ -201,7 +203,35 @@ void YarpLoggerRerun::run()
                 jointsCtrlModes[i] = VOCAB_CM_UNKNOWN;
             }
             jointsCtrlModes[i] = yarp::os::Vocab32::decode(mode);
-            recordingStream.try_log_static("controlModes/" + m_axesNames[i], rerun::TextLog(rerun::components::Text(jointsCtrlModes[i])).with_level( rerun::TextLogLevel::Info));
+            recordingStream.try_log_static("controlModes/" + m_axesNames[i], rerun::TextLog(rerun::components::Text(jointsCtrlModes[i])).with_level(rerun::TextLogLevel::Info));
+        }
+    }
+    if (m_logIInteractionMode)
+    {
+        for (size_t i = 0; i < m_axesNames.size(); ++i) 
+        {
+            yarp::dev::InteractionModeEnum mode;
+            if (!iIntMode->getInteractionMode(i, &mode))
+            {
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get interaction mode for joint" << m_axesNames[i] << ", setting to UNKNOWN";
+                jointsInteractionModes[i] = yarp::dev::VOCAB_IM_UNKNOWN;
+            }
+            jointsInteractionModes[i] = yarp::os::Vocab32::decode(mode);
+            recordingStream.try_log_static("interactionModes/" + m_axesNames[i], rerun::TextLog(rerun::components::Text(jointsInteractionModes[i])).with_level(rerun::TextLogLevel::Info));
+        }
+    }
+    if (m_logIMotorTemperatures)
+    {
+        // Available only with this yarp branch: https://github.com/ami-iit/yarp/tree/yarp-3.10.1-motor-temperature
+        // See this PR for more details: https://github.com/robotology/yarp/pull/3188
+        for (size_t i = 0; i < m_axesNames.size(); ++i) 
+        {
+            if (!iMotor->getTemperature(i, &motorTemperatures[i]))
+            {
+                yCWarningOnce(YARP_LOGGER_RERUN) << "Failed to get motor temperatures for motor" << m_axesNames[i] << ", setting to 0.0";
+                motorTemperatures[i] = 0.0;
+            }
+            recordingStream.try_log("motorTemperatures/" + m_axesNames[i], rerun::Scalars(motorTemperatures[i]));
         }
     }
     if (kinematicsInitialized)
