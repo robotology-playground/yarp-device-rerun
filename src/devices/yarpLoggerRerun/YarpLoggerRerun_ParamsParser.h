@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Thu Nov  6 09:56:36 2025
+// Generated on: Thu Nov 27 14:40:29 2025
 
 
 #ifndef YARPLOGGERRERUN_PARAMSPARSER_H
@@ -23,21 +23,30 @@
 * This class is the parameters parser for class YarpLoggerRerun.
 *
 * These are the used parameters:
-* | Group name | Parameter name    | Type           | Units | Default Value      | Required | Description | Notes |
-* |:----------:|:-----------------:|:--------------:|:-----:|:------------------:|:--------:|:-----------:|:-----:|
-* | -          | axesNames         | vector<string> | -     | -                  | 1        | -           | -     |
-* | -          | logIEncoders      | bool           | -     | true               | 0        | -           | -     |
-* | -          | logIMotorEncoders | bool           | -     | false              | 0        | -           | -     |
-* | -          | logIPidControl    | bool           | -     | false              | 0        | -           | -     |
-* | -          | logURDF           | bool           | -     | false              | 0        | -           | -     |
-* | -          | fileName          | string         | -     | log_test           | 0        | -           | -     |
-* | -          | filePath          | string         | -     | /home/ergocub/test | 0        | -           | -     |
-* | -          | saveToFile        | bool           | -     | false              | 0        | -           | -     |
-* | -          | viewerIp          | string         | -     | localhost          | 0        | -           | -     |
+* | Group name | Parameter name               | Type           | Units | Default Value       | Required | Description                                                      | Notes |
+* |:----------:|:----------------------------:|:--------------:|:-----:|:-------------------:|:--------:|:----------------------------------------------------------------:|:-----:|
+* | -          | axesNames                    | vector<string> | -     | -                   | 1        | -                                                                | -     |
+* | -          | logIEncoders                 | bool           | -     | true                | 0        | -                                                                | -     |
+* | -          | logIMotorEncoders            | bool           | -     | false               | 0        | -                                                                | -     |
+* | -          | logIPidControl               | bool           | -     | false               | 0        | -                                                                | -     |
+* | -          | logITorqueControl            | bool           | -     | false               | 0        | -                                                                | -     |
+* | -          | logIAmplifierControl         | bool           | -     | false               | 0        | -                                                                | -     |
+* | -          | logIControlMode              | bool           | -     | false               | 0        | -                                                                | -     |
+* | -          | logIInteractionMode          | bool           | -     | false               | 0        | -                                                                | -     |
+* | -          | logIMotorTemperatures        | bool           | -     | false               | 0        | -                                                                | -     |
+* | -          | logILocalization2D           | bool           | -     | false               | 0        | -                                                                | -     |
+* | -          | localizationRemoteName       | string         | -     | /localizationRemote | 0        | Must have the name of the remote port defined in the related nws | -     |
+* | -          | logIRawValuesPublisher       | bool           | -     | false               | 0        | -                                                                | -     |
+* | -          | rawValuesPublisherRemoteName | string         | -     | /rawValuesRemote    | 0        | Must have the name of the remote port defined in the related nws | -     |
+* | -          | logURDF                      | bool           | -     | false               | 0        | -                                                                | -     |
+* | -          | fileName                     | string         | -     | log_test            | 0        | -                                                                | -     |
+* | -          | filePath                     | string         | -     | /home/ergocub/test  | 0        | -                                                                | -     |
+* | -          | saveToFile                   | bool           | -     | false               | 0        | -                                                                | -     |
+* | -          | viewerIp                     | string         | -     | localhost           | 0        | -                                                                | -     |
 *
 * The device can be launched by yarpdev using one of the following examples (with and without all optional parameters):
 * \code{.unparsed}
-* yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost
+* yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logITorqueControl false --logIAmplifierControl false --logIControlMode false --logIInteractionMode false --logIMotorTemperatures false --logILocalization2D false --localizationRemoteName /localizationRemote --logIRawValuesPublisher false --rawValuesPublisherRemoteName /rawValuesRemote --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost
 * \endcode
 *
 * \code{.unparsed}
@@ -69,6 +78,15 @@ public:
     const std::string m_logIEncoders_defaultValue = {"true"};
     const std::string m_logIMotorEncoders_defaultValue = {"false"};
     const std::string m_logIPidControl_defaultValue = {"false"};
+    const std::string m_logITorqueControl_defaultValue = {"false"};
+    const std::string m_logIAmplifierControl_defaultValue = {"false"};
+    const std::string m_logIControlMode_defaultValue = {"false"};
+    const std::string m_logIInteractionMode_defaultValue = {"false"};
+    const std::string m_logIMotorTemperatures_defaultValue = {"false"};
+    const std::string m_logILocalization2D_defaultValue = {"false"};
+    const std::string m_localizationRemoteName_defaultValue = {"/localizationRemote"};
+    const std::string m_logIRawValuesPublisher_defaultValue = {"false"};
+    const std::string m_rawValuesPublisherRemoteName_defaultValue = {"/rawValuesRemote"};
     const std::string m_logURDF_defaultValue = {"false"};
     const std::string m_fileName_defaultValue = {"log_test"};
     const std::string m_filePath_defaultValue = {"/home/ergocub/test"};
@@ -79,6 +97,15 @@ public:
     bool m_logIEncoders = {true};
     bool m_logIMotorEncoders = {false};
     bool m_logIPidControl = {false};
+    bool m_logITorqueControl = {false};
+    bool m_logIAmplifierControl = {false};
+    bool m_logIControlMode = {false};
+    bool m_logIInteractionMode = {false};
+    bool m_logIMotorTemperatures = {false};
+    bool m_logILocalization2D = {false};
+    std::string m_localizationRemoteName = {"/localizationRemote"};
+    bool m_logIRawValuesPublisher = {false};
+    std::string m_rawValuesPublisherRemoteName = {"/rawValuesRemote"};
     bool m_logURDF = {false};
     std::string m_fileName = {"log_test"};
     std::string m_filePath = {"/home/ergocub/test"};
