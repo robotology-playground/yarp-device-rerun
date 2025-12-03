@@ -188,6 +188,7 @@ void YarpLoggerRerun::run()
     {
         // Those methods are not implemented in gz-sim-yarp-plugins, logIPidControl should be used only with real robots
         // WARNING: these are RPC calls, so they might slow down the logging thread
+        yCWarningOnce(YARP_LOGGER_RERUN) << "logIPidControl is enabled; note that this might slow down the logging thread due to RPC calls.";
         for (size_t i = 0; i < m_axesNames.size(); ++i) 
         {
             if (!iPid->getPidReference(yarp::dev::VOCAB_PIDTYPE_POSITION, i, &jointPosRef[i]))

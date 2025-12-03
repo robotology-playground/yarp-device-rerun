@@ -16,7 +16,6 @@ Before proceeding further, please install the following dependencies:
 
 - [YARP 3.12](https://github.com/robotology/yarp/releases/tag/v3.12.0)
 - [iDynTree](https://robotology.github.io/idyntree)
-<!-- - [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) -->
 
 # 3. Install
 
@@ -45,17 +44,26 @@ This device has to be launched via the yarprobotinterface for logging quantities
 The parameters supported so far are:
 
 ```
-| Parameter name     | Type            | Units   | Default Value    | Required |
-|:------------------:|:---------------:|:-------:|:----------------:|:--------:|
-| axesNames          | vector<string>  | -       |                  |  Yes     |
-| logIEncoders       | bool            | -       |     true         |  No      |
-| logIMotorEncoders  | bool            | -       |     false        |  No      |
-| logIPidControl     | bool            | -       |     false        |  No      |
-| logURDF            | bool            | -       |     false        |  No      |
-| fileName           | string          | -       |     log_test     |  No      |
-| filePath           | string          | -       |/home/ergocub/test|  No      |
-| saveToFile         | bool            | -       |     false        |  No      |
-| viewerIp           | string          | -       |    localhost     |  No      |
+| Parameter name               | Type            | Units   | Default Value       | Required |
+|:----------------------------:|:---------------:|:-------:|:-------------------:|:--------:|
+| axesNames                    | vector<string>  | -       |                     |  Yes     |
+| logIEncoders                 | bool            | -       |     true            |  No      |
+| logIMotorEncoders            | bool            | -       |     false           |  No      |
+| logIPidControl               | bool            | -       |     false           |  No      |
+| logITorqueControl            | bool            | -       |     false           |  No      |
+| logIAmplifierControl         | bool            | -       |     false           |  No      |
+| logIControlMode              | bool            | -       |     false           |  No      |
+| logIInteractionMode          | bool            | -       |     false           |  No      |
+| logIMotorTemperatures        | bool            | -       |     false           |  No      |
+| logILocalization2D           | bool            | -       |     false           |  No      |
+| localizationRemoteName       | string          | -       | /localizationRemote |  No      |
+| logIRawValuesPublisher       | bool            | -       |     false           |  No      |
+| rawValuesPublisherRemoteName | string          | -       | /rawValuesRemote    |  No      |
+| logURDF                      | bool            | -       |     false           |  No      |
+| fileName                     | string          | -       |     log_test        |  No      |
+| filePath                     | string          | -       |/home/ergocub/test   |  No      |
+| saveToFile                   | bool            | -       |     false           |  No      |
+| viewerIp                     | string          | -       |    localhost        |  No      |
 ```
 
 Here an example of xml for using this device on ergoCubSN002:
@@ -66,12 +74,19 @@ Here an example of xml for using this device on ergoCubSN002:
 
     <device xmlns:xi="http://www.w3.org/2001/XInclude" name="yarpLoggerRerun" type="yarpLoggerRerun">
         <param name="axesNames">(neck_pitch, neck_roll, neck_yaw, l_shoulder_pitch, l_shoulder_roll, l_shoulder_yaw, l_elbow, l_wrist_yaw, l_wrist_roll, l_wrist_pitch, r_shoulder_pitch, r_shoulder_roll, r_shoulder_yaw, r_elbow, r_wrist_yaw, r_wrist_roll, r_wrist_pitch, torso_roll, torso_pitch, torso_yaw, r_hip_pitch, r_hip_roll, r_hip_yaw, r_knee, r_ankle_pitch, r_ankle_roll, l_hip_pitch, l_hip_roll, l_hip_yaw, l_knee, l_ankle_pitch, l_ankle_roll, l_thumb_add, l_thumb_oc, l_index_add, l_index_oc, l_middle_oc, l_ring_pinky_oc, r_thumb_add, r_thumb_oc, r_index_add, r_index_oc, r_middle_oc, r_ring_pinky_oc)</param>
-        <param name="logIEncoders">false</param>
+        <param name="logIEncoders">true</param>
         <param name="logIMotorEncoders">false</param>
         <param name="logIPidControl">false</param>
+        <param name="logITorqueControl">false</param> 
+        <param name="logIAmplifierControl">false</param>
+        <param name="logIControlMode">false</param>
+        <param name="logIInteractionMode">false</param>
+        <param name="logIMotorTemperatures">false</param>
+        <param name="logILocalization2D">false</param>
+        <param name="logIRawValuesPublisher">false</param>
         <param name="logURDF">true</param>
         <param name="fileName">log_test</param>
-        <param name="filePath">/home/user/test</param>
+        <param name="filePath">/home/mgloria/iit/yarp-device-rerun/</param>
         <param name="saveToFile">false</param>
         <param name="viewerIp">localhost</param>
 
