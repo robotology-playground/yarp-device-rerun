@@ -13,13 +13,19 @@
 #include <yarp/os/LogStream.h>
 #include <yarp/dev/IEncoders.h>
 #include <yarp/dev/IMotorEncoders.h>
+#include <yarp/dev/IMotor.h>
 #include <yarp/dev/IPidControl.h>
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/os/PeriodicThread.h>
 #include <yarp/dev/IMultipleWrapper.h>
 #include <yarp/dev/IPositionControl.h>
+#include <yarp/dev/ITorqueControl.h>
+#include <yarp/dev/IAmplifierControl.h>
+#include <yarp/dev/IControlMode.h>
 #include <yarp/dev/IAxisInfo.h>
-#include <yarp/dev/IJointCoupling.h>
+#include <yarp/dev/IInteractionMode.h>
+#include <yarp/dev/ILocalization2D.h>
+#include <iCub/IRawValuesPublisher.h>
 
 #include <iDynTree/Model.h>
 #include <iDynTree/ModelLoader.h>
@@ -57,16 +63,23 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     std::string getLinkPath(const iDynTree::Model& model, const std::string& targetLink);
 
     rerun::RecordingStream recordingStream{"logger_app_id_" + std::to_string(yarp::os::Time::now()), "logger_recording_id"};
-    std::vector<std::string> actuatedAxesNames;
-    yarp::dev::PolyDriver driver;
+    yarp::dev::PolyDriver driver, localization2DClient, rawValuesPublisherClient;
     yarp::dev::IEncoders* iEnc{nullptr};
     yarp::dev::IMotorEncoders* iMotorEnc{nullptr};
+    yarp::dev::IMotor* iMotor{nullptr};
     yarp::dev::IPidControl* iPid{nullptr};
     yarp::dev::IMultipleWrapper* iMultWrap{nullptr};
     yarp::dev::IPositionControl* iPos{nullptr};
+    yarp::dev::ITorqueControl* iTorque{nullptr};
+    yarp::dev::IAmplifierControl* iAmp{nullptr};
+    yarp::dev::IControlMode* iCtrlMode{nullptr};
     yarp::dev::IAxisInfo* iAxis{nullptr};
-    yarp::dev::IJointCoupling* iJointCoupling{nullptr};
-    std::vector<double> jointsPos, jointsVel, jointsAcc, motorPos, motorVel, motorAcc, jointPosRef, jointPosErr;
+    yarp::dev::IInteractionMode* iIntMode{nullptr};
+    yarp::dev::Nav2D::ILocalization2D* iLoc{nullptr};
+    iCub::debugLibrary::IRawValuesPublisher* iRawValPub{nullptr};
+    std::vector<double> jointsPos, jointsVel, jointsAcc, motorPos, motorVel, motorAcc, jointPosRef, jointPosErr, jointsTorques, motorCurrents, motorPWM, motorTemperatures, odometryData;
+    std::vector<std::string> jointsCtrlModes, jointsInteractionModes;
+    std::map<std::string, std::vector<std::int32_t>> rawDataValuesMap;
     int axes;
     std::mutex rerunMutex;
     std::string urdfPath, robotName, urdfFileName{"model.urdf"};
