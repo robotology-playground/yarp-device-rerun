@@ -80,6 +80,7 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     std::vector<double> jointsPos, jointsVel, jointsAcc, motorPos, motorVel, motorAcc, jointPosRef, jointPosErr, jointsTorques, motorCurrents, motorPWM, motorTemperatures, odometryData;
     std::vector<std::string> jointsCtrlModes, jointsInteractionModes;
     std::map<std::string, std::vector<std::int32_t>> rawDataValuesMap;
+    iCub::rawValuesKeyMetadataMap rawDataMetadata;
     int axes;
     std::mutex rerunMutex;
     std::string urdfPath, robotName, urdfFileName{"model.urdf"};

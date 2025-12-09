@@ -300,9 +300,14 @@ void YarpLoggerRerun::run()
             yCWarning(YARP_LOGGER_RERUN) << "Raw data was not read correctly";
         }
 
-        for (auto [key,value] : rawDataValuesMap)
+        for (auto [key, value] : rawDataValuesMap)
         {
-            recordingStream.try_log("rawValues/" + key, rerun::Scalars(value));
+            std::vector<std::string> axesNames = rawDataMetadata.metadataMap[key].axesNames;
+            std::vector<std::string> rawValueNames = rawDataMetadata.metadataMap[key].rawValueNames;
+            for (auto i = 0; i < rawDataMetadata.metadataMap[key].rawValueNames.size(); i++)
+            {
+                recordingStream.try_log(rawDataMetadata.metadataMap[key].rawValueNames[i], rerun::Scalars(value[i]));
+            }
         }
     }
 
@@ -340,6 +345,16 @@ bool YarpLoggerRerun::attachAll(const yarp::dev::PolyDriverList& driverList) {
     if (!initKinematics(urdfPath))
     {
         yCWarning(YARP_LOGGER_RERUN) << "Kinematics initialization failed; proceeding without link pose animation.";
+    }
+ 
+    if (m_logIRawValuesPublisher)
+    {
+        rawDataMetadata = {};
+        if (!iRawValPub->getMetadataMap(rawDataMetadata))
+        {
+            yCError(YARP_LOGGER_RERUN) << "Raw data metadata was not read correctly";
+            return false;
+        }
     }
     this->start();
 
