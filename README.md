@@ -91,7 +91,7 @@ Here an example of xml for using this device on ergoCubSN002:
         <param name="saveToFile">false</param>
         <param name="viewerIp">localhost</param>
 
-         <action phase="startup" level="5" type="attach">
+         <action phase="startup" level="20" type="attach">
              <paramlist name="networks">
                 <!-- motorcontrol -->
                 <elem name="head-j0">head-eb20-j0_2-mc</elem>
@@ -113,7 +113,7 @@ Here an example of xml for using this device on ergoCubSN002:
                 <elem name="right_lower_leg-j2">right_leg-eb7-j4_5-mc</elem>
              </paramlist>
         </action>
-        <action phase="shutdown" level="15" type="detach" />
+        <action phase="shutdown" level="5" type="detach" />
 
     </device>
 ```

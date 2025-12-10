@@ -23,7 +23,7 @@
         <param name="saveToFile">false</param>
         <param name="viewerIp">localhost</param>
 
-         <action phase="startup" level="5" type="attach">
+         <action phase="startup" level="20" type="attach">
              <paramlist name="networks">
                 <!-- motorcontrol -->
                 <elem name="head">head_hardware_device</elem>
@@ -36,6 +36,6 @@
                 <elem name="right_arm_joints2"> right_hand-coupling_handler </elem>
              </paramlist>
          </action>
-         <action phase="shutdown" level="15" type="detach" />
+         <action phase="shutdown" level="5" type="detach" />
 
      </device>
