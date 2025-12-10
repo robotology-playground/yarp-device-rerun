@@ -46,6 +46,7 @@ The parameters supported so far are:
 ```
 | Parameter name               | Type            | Units   | Default Value       | Required |
 |:----------------------------:|:---------------:|:-------:|:-------------------:|:--------:|
+| yarpRobotName                | string          | -       |                     |  Yes     |
 | axesNames                    | vector<string>  | -       |                     |  Yes     |
 | logIEncoders                 | bool            | -       |     true            |  No      |
 | logIMotorEncoders            | bool            | -       |     false           |  No      |

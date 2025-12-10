@@ -605,5 +605,5 @@ std::string YarpLoggerRerun::getLinkPath(const iDynTree::Model & model, const st
         parentLink = traversal.getParentLinkFromLinkIndex(parentLink->getIndex());
     }
 
-    return "/ergoCub" + path;
+    return "/" + m_yarpRobotName + path;
 }

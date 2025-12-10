@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Thu Nov 27 14:40:29 2025
+// Generated on: Wed Dec 10 09:10:38 2025
 
 
 #include "YarpLoggerRerun_ParamsParser.h"
@@ -28,6 +28,7 @@ YarpLoggerRerun_ParamsParser::YarpLoggerRerun_ParamsParser()
 std::vector<std::string> YarpLoggerRerun_ParamsParser::getListOfParams() const
 {
     std::vector<std::string> params;
+    params.push_back("yarpRobotName");
     params.push_back("axesNames");
     params.push_back("logIEncoders");
     params.push_back("logIMotorEncoders");
@@ -52,6 +53,11 @@ std::vector<std::string> YarpLoggerRerun_ParamsParser::getListOfParams() const
 
 bool YarpLoggerRerun_ParamsParser::getParamValue(const std::string& paramName, std::string& paramValue) const
 {
+    if (paramName =="yarpRobotName")
+    {
+        paramValue = m_yarpRobotName;
+        return true;
+    }
     if (paramName =="axesNames")
     {
         return false;
@@ -180,6 +186,22 @@ bool      YarpLoggerRerun_ParamsParser::parseParams(const yarp::os::Searchable &
 
     m_provided_configuration = config.toString();
     yarp::os::Property prop_check(m_provided_configuration.c_str());
+    //Parser of parameter yarpRobotName
+    {
+        if (config.check("yarpRobotName"))
+        {
+            m_yarpRobotName = config.find("yarpRobotName").asString();
+            yCInfo(YarpLoggerRerunParamsCOMPONENT) << "Parameter 'yarpRobotName' using value:" << m_yarpRobotName;
+        }
+        else
+        {
+            yCError(YarpLoggerRerunParamsCOMPONENT) << "Mandatory parameter 'yarpRobotName' not found!";
+            yCError(YarpLoggerRerunParamsCOMPONENT) << "Description of the parameter: It could be `ergoCub` or `iCub`";
+            return false;
+        }
+        prop_check.unput("yarpRobotName");
+    }
+
     //Parser of parameter axesNames
     {
         if (config.check("axesNames"))
@@ -484,6 +506,7 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("This is the help for device: YarpLoggerRerun\n");
     doc = doc + std::string("\n");
     doc = doc + std::string("This is the list of the parameters accepted by the device:\n");
+    doc = doc + std::string("'yarpRobotName': It could be `ergoCub` or `iCub`\n");
     doc = doc + std::string("'axesNames': \n");
     doc = doc + std::string("'logIEncoders': \n");
     doc = doc + std::string("'logIMotorEncoders': \n");
@@ -504,8 +527,8 @@ std::string      YarpLoggerRerun_ParamsParser::getDocumentationOfDeviceParams() 
     doc = doc + std::string("'viewerIp': \n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logITorqueControl false --logIAmplifierControl false --logIControlMode false --logIInteractionMode false --logIMotorTemperatures false --logILocalization2D false --localizationRemoteName /localizationRemote --logIRawValuesPublisher false --rawValuesPublisherRemoteName /rawValuesRemote --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --yarpRobotName <mandatory_value> --axesNames <mandatory_value> --logIEncoders true --logIMotorEncoders false --logIPidControl false --logITorqueControl false --logIAmplifierControl false --logIControlMode false --logIInteractionMode false --logIMotorTemperatures false --logILocalization2D false --localizationRemoteName /localizationRemote --logIRawValuesPublisher false --rawValuesPublisherRemoteName /rawValuesRemote --logURDF false --fileName log_test --filePath /home/ergocub/test --saveToFile false --viewerIp localhost\n";
     doc = doc + std::string("Using only mandatory params:\n");
-    doc = doc + " yarpdev --device yarpLoggerRerun --axesNames <mandatory_value>\n";
+    doc = doc + " yarpdev --device yarpLoggerRerun --yarpRobotName <mandatory_value> --axesNames <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
 }
