@@ -25,7 +25,10 @@
 #include <yarp/dev/IAxisInfo.h>
 #include <yarp/dev/IInteractionMode.h>
 #include <yarp/dev/ILocalization2D.h>
+
+#ifdef USE_RAWVALUES_PUBLISHER
 #include <iCub/IRawValuesPublisher.h>
+#endif
 
 #include <iDynTree/Model.h>
 #include <iDynTree/ModelLoader.h>
@@ -76,11 +79,13 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     yarp::dev::IAxisInfo* iAxis{nullptr};
     yarp::dev::IInteractionMode* iIntMode{nullptr};
     yarp::dev::Nav2D::ILocalization2D* iLoc{nullptr};
+#ifdef USE_RAWVALUES_PUBLISHER
     iCub::debugLibrary::IRawValuesPublisher* iRawValPub{nullptr};
+    iCub::rawValuesKeyMetadataMap rawDataMetadata;
+    std::map<std::string, std::vector<std::int32_t>> rawDataValuesMap;
+#endif
     std::vector<double> jointsPos, jointsVel, jointsAcc, motorPos, motorVel, motorAcc, jointPosRef, jointPosErr, jointsTorques, motorCurrents, motorPWM, motorTemperatures, odometryData;
     std::vector<std::string> jointsCtrlModes, jointsInteractionModes;
-    std::map<std::string, std::vector<std::int32_t>> rawDataValuesMap;
-    iCub::rawValuesKeyMetadataMap rawDataMetadata;
     int axes;
     std::mutex rerunMutex;
     std::string urdfPath, robotName, urdfFileName{"model.urdf"};

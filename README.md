@@ -87,7 +87,7 @@ Here an example of xml for using this device on ergoCubSN002:
         <param name="logIRawValuesPublisher">false</param>
         <param name="logURDF">true</param>
         <param name="fileName">log_test</param>
-        <param name="filePath">/home/mgloria/iit/yarp-device-rerun/</param>
+        <param name="filePath">/home/user/test/</param>
         <param name="saveToFile">false</param>
         <param name="viewerIp">localhost</param>
 

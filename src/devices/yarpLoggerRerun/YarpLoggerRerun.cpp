@@ -33,6 +33,14 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
         return false;
     }
 
+#ifndef USE_RAWVALUES_PUBLISHER
+    if (m_logIRawValuesPublisher)
+    {
+        yCError(YARP_LOGGER_RERUN) << "logIRawValuesPublisher requested, but yarpLoggerRerun was compiled without RawValuesPublisher support, exiting.";
+        return false;
+    }
+#endif
+
     yarp::os::Property conf;
     conf.fromString(config.toString().c_str());
 
@@ -60,6 +68,7 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
             return false;
         }
     }
+#ifdef USE_RAWVALUES_PUBLISHER
     if (conf.check("logIRawValuesPublisher") && m_logIRawValuesPublisher)
     {
         yarp::os::Property rawValPubClientProp;
@@ -77,6 +86,8 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
             return false;
         }
     }
+    rawDataValuesMap.clear();
+#endif
 
     if (!(driver.view(iEnc) && driver.view(iPos) && driver.view(iMotorEnc) && driver.view(iPid) && driver.view(iAxis) && driver.view(iMultWrap) && driver.view(iTorque) && driver.view(iAmp) && driver.view(iCtrlMode) && driver.view(iIntMode) && driver.view(iMotor)))
     {
@@ -101,7 +112,6 @@ bool YarpLoggerRerun::open(yarp::os::Searchable& config)
     jointsInteractionModes.resize(axes);
     motorTemperatures.resize(axes);
     odometryData.resize(9); // x, y, theta, base_vel_x, base_vel_y, base_vel_theta, odom_vel_x, odom_vel_y, odom_vel_theta
-    rawDataValuesMap.clear();
 
     yarp::os::ResourceFinder & rf = yarp::os::ResourceFinder::getResourceFinderSingleton();
     urdfPath = rf.findFileByName(urdfFileName);
@@ -125,10 +135,12 @@ bool YarpLoggerRerun::close()
     {
         localization2DClient.close();
     }
+#ifdef USE_RAWVALUES_PUBLISHER
     if (m_logIRawValuesPublisher && rawValuesPublisherClient.isValid())
     {
         rawValuesPublisherClient.close();
     }
+#endif
     return true;
 }
 
@@ -295,6 +307,7 @@ void YarpLoggerRerun::run()
     }
     if (m_logIRawValuesPublisher)
     {
+#ifdef USE_RAWVALUES_PUBLISHER
         if (!iRawValPub->getRawDataMap(rawDataValuesMap))
         {
             yCWarning(YARP_LOGGER_RERUN) << "Raw data was not read correctly";
@@ -309,6 +322,7 @@ void YarpLoggerRerun::run()
                 recordingStream.try_log(rawDataMetadata.metadataMap[key].rawValueNames[i], rerun::Scalars(value[i]));
             }
         }
+#endif
     }
 
     if (kinematicsInitialized)
@@ -347,6 +361,7 @@ bool YarpLoggerRerun::attachAll(const yarp::dev::PolyDriverList& driverList) {
         yCWarning(YARP_LOGGER_RERUN) << "Kinematics initialization failed; proceeding without link pose animation.";
     }
  
+#ifdef USE_RAWVALUES_PUBLISHER
     if (m_logIRawValuesPublisher)
     {
         rawDataMetadata = {};
@@ -356,6 +371,8 @@ bool YarpLoggerRerun::attachAll(const yarp::dev::PolyDriverList& driverList) {
             return false;
         }
     }
+#endif
+
     this->start();
 
     return true;

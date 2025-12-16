@@ -19,14 +19,22 @@ if(ENABLE_yarpLoggerRerun)
                                             YarpLoggerRerun_ParamsParser.cpp
                                             YarpLoggerRerun_ParamsParser.h)
 
-    target_link_libraries(yarpLoggerRerun PUBLIC  YARP::YARP_os
-                                                    YARP::YARP_dev
-                                                    YARP::YARP_init
-                                                    iDynTree::idyntree-model
-                                                    iDynTree::idyntree-modelio
-                                                    iDynTree::idyntree-high-level
-                                                    ICUB::iCubDev
-                                                    rerun_sdk)
+    set(yarpLoggerRerun_LINK_LIBRARIES
+        YARP::YARP_os
+        YARP::YARP_dev
+        YARP::YARP_init
+        iDynTree::idyntree-model
+        iDynTree::idyntree-modelio
+        iDynTree::idyntree-high-level
+        rerun_sdk
+    )
+
+    if(YARP_DEVICE_RERUN_ENABLE_RAWVALUES)
+        list(APPEND yarpLoggerRerun_LINK_LIBRARIES ICUB::iCubDev)
+        target_compile_definitions(yarpLoggerRerun PUBLIC -DUSE_RAWVALUES_PUBLISHER)
+    endif()
+
+    target_link_libraries(yarpLoggerRerun PUBLIC ${yarpLoggerRerun_LINK_LIBRARIES})
 
     yarp_install(TARGETS yarpLoggerRerun
                 EXPORT yarp-device-rerun

@@ -10,8 +10,11 @@ project(yarp-device-rerun LANGUAGES CXX)
 find_package(YARP 3.12.0 REQUIRED)
 find_package(YCM REQUIRED)
 find_package(iDynTree REQUIRED)
-find_package(iCubDev 2.7.0 QUIET)
 
+option(YARP_DEVICE_RERUN_ENABLE_RAWVALUES "Enable RawValuesPublisher support (requires iCubDev)" OFF)
+if(YARP_DEVICE_RERUN_ENABLE_RAWVALUES)
+  find_package(iCubDev 2.7.0 REQUIRED)
+endif()
 # Support either rerun from find_package, or fallback to FetchContent
 # By default, set YARP_DEVICE_RERUN_USE_SYSTEM_RERUN to ON if find_package(rerun_sdk) works
 set(YARP_DEVICE_RERUN_USE_SYSTEM_RERUN_DEFAULT_VALUE "OFF")
