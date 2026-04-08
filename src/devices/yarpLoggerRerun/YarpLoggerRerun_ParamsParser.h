@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Wed Dec 10 09:10:38 2025
+// Generated on: Thu Mar 19 10:35:47 2026
 
 
 #ifndef YARPLOGGERRERUN_PARAMSPARSER_H

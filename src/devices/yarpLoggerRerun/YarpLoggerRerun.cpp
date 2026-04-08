@@ -6,6 +6,7 @@
  * BSD-3-Clause license. See the accompanying LICENSE file for details.
  */
 
+#include <atomic>
 #include <yarp/os/ResourceFinder.h>
 #include <yarp/os/Vocab.h>
 #include <rerun/log_sink.hpp>
@@ -14,6 +15,10 @@
 
 YARP_LOG_COMPONENT(YARP_LOGGER_RERUN, "yarp.device.yarpLoggerRerun")
 constexpr double log_thread_default{ 0.010 };
+
+namespace {
+    std::atomic<uint64_t> g_frame{0};
+}
 
 YarpLoggerRerun::YarpLoggerRerun() : yarp::os::PeriodicThread(log_thread_default)
 {
@@ -146,6 +151,7 @@ bool YarpLoggerRerun::close()
 
 void YarpLoggerRerun::run()
 {
+    recordingStream.set_time_sequence("frame", g_frame++);
     if (m_logIMotorEncoders)
     {
         for (size_t i = 0; i < m_axesNames.size(); ++i) 
@@ -345,10 +351,21 @@ void YarpLoggerRerun::configureRerun(rerun::RecordingStream& recordingStream)
         yCInfo(YARP_LOGGER_RERUN) << "Only realtime streaming, no file saving";
         recordingStream.set_sinks(rerun::GrpcSink{"rerun+http://" + m_viewerIp + ":9876/proxy"});
     }
+    // if (m_saveToFile && !m_fileName.empty()) 
+    // {
+    //     recordingStream.serve_grpc("0.0.0.0", 9876);
+    //     recordingStream.set_sinks(rerun::FileSink{m_filePath + m_fileName + ".rrd"});
+    // }
+    // else
+    // {
+    //     recordingStream.serve_grpc("0.0.0.0", 9876);
+    // }
 
     if (m_logURDF)
     {
-        recordingStream.try_log_file_from_path(urdfPath, "/", false);
+        // Log URDF under a root entity
+        recordingStream.try_log_file_from_path(urdfPath, "robot", true);
+        recordingStream.flush_blocking();
     }
 }
 
@@ -454,10 +471,6 @@ bool YarpLoggerRerun::initKinematics(const std::string& urdfPath)
         {
             q.setVal(i, iDynTree::deg2rad(initPos[it->second]));
         }
-        else
-        {
-            yCDebug(YARP_LOGGER_RERUN) << "Joint" << jointName << "not in control board, leaving at 0";
-        }
     }
 
     iDynTree::Twist baseVel = iDynTree::Twist::Zero();
@@ -470,55 +483,10 @@ bool YarpLoggerRerun::initKinematics(const std::string& urdfPath)
         return false;
     }
 
-    auto& model = kinDyn.model();
-    model.computeFullTreeTraversal(traversal);
-    zeroTransforms.resize(model.getNrOfLinks());
-
-    for (size_t l = 0; l < model.getNrOfLinks(); l++)
-    {
-        std::string linkName = model.getLinkName(l);
-        const iDynTree::Link* parentLink = traversal.getParentLinkFromLinkIndex(l);
-        if (parentLink != nullptr)
-        {
-            // Rerun allows to publish on the child node the trasform between the child link frame actual position and the child link frame position if the joint position is set to 0
-            // see https://github.com/rerun-io/rerun/issues/10626#issuecomment-3517446719
-            auto actualTransform = kinDyn.getRelativeTransform(model.getLinkName(parentLink->getIndex()), linkName); //child link actual pose
-            const iDynTree::IJoint* parentJoint = traversal.getParentJointFromLinkIndex(l);
-            if (parentJoint != nullptr)
-            {
-                zeroTransforms[l] = parentJoint->getRestTransform(parentLink->getIndex(), l); //child link pose at zero joint position
-            }
-            else
-            {
-                yCError(YARP_LOGGER_RERUN) << "Parent joint is null for link" << linkName;
-                return false;
-            }
-            auto transform = zeroTransforms[l].inverse() * actualTransform;
-            auto position = transform.getPosition();
-            auto rotation = transform.getRotation();
-            double qx, qy, qz, qw;
-            rotation.getQuaternion(qw, qx, qy, qz);
-
-            rerun::components::Translation3D translation(
-                static_cast<float>(position(0)) * 0.001f,
-                static_cast<float>(position(1)) * 0.001f,
-                static_cast<float>(position(2)) * 0.001f
-            );
-            rerun::components::RotationQuat rotation_component = rerun::datatypes::Quaternion::from_wxyz(
-                static_cast<float>(qw),
-                static_cast<float>(qx),
-                static_cast<float>(qy),
-                static_cast<float>(qz)
-            );
-
-            std::string path = getLinkPath(model, linkName);
-            recordingStream.try_log(path + "/" + linkName, rerun::Transform3D().with_translation(translation).with_quaternion(rotation_component));
-        }
-    }
-
     kinematicsInitialized = true;
     yCInfo(YARP_LOGGER_RERUN) << "Kinematics initialized with" << modelLoader.model().getNrOfDOFs() << "DOFs";
 
+    logKinematicsToRerun();
     return true;
 }
 
@@ -540,7 +508,8 @@ void YarpLoggerRerun::updateKinematics()
     iDynTree::Vector3 g; g(0)=0; g(1)=0; g(2)=-9.81;
     iDynTree::Transform world_T_base = iDynTree::Transform::Identity();
     iDynTree::VectorDynSize q(modelLoader.model().getNrOfDOFs());
-    q.zero(); 
+    q.zero();
+
     for (size_t i = 0; i < modelLoader.model().getNrOfDOFs(); ++i)
     {
         std::string jointName = kinDyn.model().getJointName(i);
@@ -549,78 +518,67 @@ void YarpLoggerRerun::updateKinematics()
         {
             q.setVal(i, iDynTree::deg2rad(currentPos[it->second]));
         }
-        else
-        {
-            continue;
-        }
     }
 
     iDynTree::Twist baseVel = iDynTree::Twist::Zero();
     iDynTree::VectorDynSize dq(modelLoader.model().getNrOfDOFs());
     dq.zero();
+
     if (!kinDyn.setRobotState(world_T_base, q, baseVel, dq, g))
     {
-        yCWarning(YARP_LOGGER_RERUN) << "Failed to set initial kinematic state";
+        yCWarning(YARP_LOGGER_RERUN) << "Failed to set kinematic state";
         return;
     }
 
+    logKinematicsToRerun();
+}
+
+void YarpLoggerRerun::logKinematicsToRerun()
+{
     auto& model = kinDyn.model();
     model.computeFullTreeTraversal(traversal);
 
     for (size_t l = 0; l < model.getNrOfLinks(); l++)
     {
-        std::string linkName = model.getLinkName(l);
+        std::string childLinkName = model.getLinkName(l);
         const iDynTree::Link* parentLink = traversal.getParentLinkFromLinkIndex(l);
-        if (parentLink != nullptr)
+
+        if (parentLink == nullptr)
         {
-            auto actualTransform = kinDyn.getRelativeTransform(model.getLinkName(parentLink->getIndex()), linkName); 
-            auto transform = zeroTransforms[l].inverse() * actualTransform;
-            auto position = transform.getPosition();
-            auto rotation = transform.getRotation();
+            continue;
+        }
 
-            double qx, qy, qz, qw;
-            rotation.getQuaternion(qw, qx, qy, qz);
+        std::string parentLinkName = model.getLinkName(parentLink->getIndex());
 
-            rerun::components::Translation3D translation(
-                static_cast<float>(position(0)) * 0.001f,
-                static_cast<float>(position(1)) * 0.001f,
-                static_cast<float>(position(2)) * 0.001f
-            );
-            rerun::components::RotationQuat rotation_component = rerun::datatypes::Quaternion::from_wxyz(
+        auto transform = kinDyn.getRelativeTransform(parentLinkName, childLinkName);
+        auto position = transform.getPosition();
+        auto rotation = transform.getRotation();
+
+        double qx, qy, qz, qw;
+        rotation.getQuaternion(qw, qx, qy, qz);
+
+        rerun::components::Translation3D translation(
+            static_cast<float>(position(0)),
+            static_cast<float>(position(1)),
+            static_cast<float>(position(2))
+        );
+        rerun::components::RotationQuat rotation_component =
+            rerun::datatypes::Quaternion::from_wxyz(
                 static_cast<float>(qw),
                 static_cast<float>(qx),
                 static_cast<float>(qy),
                 static_cast<float>(qz)
             );
 
-            std::string path = getLinkPath(model, linkName);
-            recordingStream.try_log(path + "/" + linkName, rerun::Transform3D().with_translation(translation).with_quaternion(rotation_component));        
-        }
+        const std::string entity_path = "robot/" + childLinkName;
+
+        recordingStream.try_log(
+            entity_path,
+            rerun::Transform3D()
+                .with_translation(translation)
+                .with_quaternion(rotation_component)
+                .with_child_frame(childLinkName)
+                .with_parent_frame(parentLinkName)
+        );
     }
-
-    return;
-}
-
-std::string YarpLoggerRerun::getLinkPath(const iDynTree::Model & model, const std::string & targetLinkName)
-{
-    std::string path{};
-    model.computeFullTreeTraversal(traversal);
-    iDynTree::LinkIndex linkIndex = model.getLinkIndex(targetLinkName);
-    const iDynTree::Link* parentLink = traversal.getParentLinkFromLinkIndex(linkIndex);
-
-    while (parentLink != nullptr)
-    {
-        std::string linkName = model.getLinkName(parentLink->getIndex());
-        const iDynTree::IJoint* parentJoint = traversal.getParentJointFromLinkIndex(linkIndex);
-        if (parentJoint != nullptr)
-        {
-            std::string jointName = model.getJointName(parentJoint->getIndex());
-            path = "/" + jointName + path;
-        }
-        path = "/" + linkName + path;
-        linkIndex = parentLink->getIndex();
-        parentLink = traversal.getParentLinkFromLinkIndex(parentLink->getIndex());
-    }
-
-    return "/" + m_yarpRobotName + path;
 }
