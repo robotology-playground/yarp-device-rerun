@@ -63,7 +63,7 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
 
     bool initKinematics(const std::string& urdfPath);
     void updateKinematics();
-    std::string getLinkPath(const iDynTree::Model& model, const std::string& targetLink);
+    // std::string getLinkPath(const iDynTree::Model& model, const std::string& targetLink);
 
     rerun::RecordingStream recordingStream{"logger_app_id_" + std::to_string(yarp::os::Time::now()), "logger_recording_id"};
     yarp::dev::PolyDriver driver, localization2DClient, rawValuesPublisherClient;
@@ -90,7 +90,9 @@ class YarpLoggerRerun : public yarp::dev::DeviceDriver,
     std::mutex rerunMutex;
     std::string urdfPath, robotName, urdfFileName{"model.urdf"};
     std::unordered_map<std::string, size_t> jointNameToIdx;
-    std::vector<iDynTree::Transform> zeroTransforms;
+    // std::vector<iDynTree::Transform> zeroTransforms;
+    void logKinematicsToRerun();
+
     
     iDynTree::ModelLoader modelLoader;
     iDynTree::KinDynComputations kinDyn;
